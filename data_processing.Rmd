@@ -1,0 +1,2009 @@
+---
+title: "Data_processing"
+author: "Jiaxuan"
+date: "5/19/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("~/Dropbox/sp_results")
+```
+
+# package loading
+```{r, message=F}
+library(tidyverse)
+library(stargazer)
+library(lubridate)
+library(scales)
+library(ggplot2)
+library(matrixStats)
+library(data.table)
+```
+
+# A) region, >200words
+```{r, message=F, error=F}
+SP_covid <- read_csv("SP_covid.csv")
+osp_text <- read_csv("sample/osp_region_200filtered.csv")
+folha_text <- read_csv("sample/folha_region_200filtered.csv")
+osp_tokenized <- read_csv("sample/osp_region_200tokenized.csv")
+folha_tokenized <- read_csv("sample/folha_region_200tokenized.csv")
+osp_tokenized_polarity <- read_csv("sample/osp_region_200tokenized_textblob_polarity.csv")
+folha_tokenized_polarity <- read_csv("sample/folha_region_200tokenized_textblob_polarity.csv")
+```
+
+```{r}
+folha_date <- dmy(folha_text$folha_de_sp_date)
+folha_text$date <- folha_date
+osp_date <- dmy(osp_text$o_estado_de_sp_date)
+osp_text$date <- osp_date
+```
+
+```{r}
+SP_covid$date <- ymd(SP_covid$date)
+SP_covid <- arrange(SP_covid, date)
+```
+
+```{r}
+osp_tokenized$date <- osp_text$date
+osp_tokenized_polarity$date <- osp_text$date
+
+osp_tokenized <- osp_tokenized %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+```
+
+```{r}
+folha_tokenized$date <- folha_text$date
+folha_tokenized_polarity$date <- folha_text$date
+
+folha_tokenized <- folha_tokenized %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+```
+
+combine df
+```{r}
+SP_covid<- SP_covid[c(1:311),]
+```
+
+```{r}
+osp_tokenized <- osp_tokenized %>%
+  filter(date %in% SP_covid$date)
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  filter(date %in% SP_covid$date)
+
+folha_tokenized <- folha_tokenized %>%
+  filter(date %in% SP_covid$date)
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  filter(date %in% SP_covid$date)
+```
+
+## mean, sum, max, min
+```{r}
+nonNA_osp <- rowSums(!is.na(osp_tokenized))
+osp_tokenized_polarity$nonNA_value <- nonNA_osp
+
+nonNA_folha <- rowSums(!is.na(folha_tokenized))
+folha_tokenized_polarity$nonNA_value <- nonNA_folha
+```
+
+#### osp
+```{r, warning=F}
+sum = rowSums(osp_tokenized_polarity[,c(2:479)], na.rm = TRUE)
+mean = sum/nonNA_osp
+max = rowMaxs(as.matrix(osp_tokenized_polarity[,c(2:479)]))
+min = rowMins(as.matrix(osp_tokenized_polarity[,c(2:479)]))
+
+osp_tokenized_polarity$sum <- sum
+osp_tokenized_polarity$mean <- mean
+osp_tokenized_polarity$max <- max
+osp_tokenized_polarity$min <- min
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  select(date, sum, mean, max, min, everything())
+
+osp_df <- osp_tokenized_polarity %>%
+  select(date, sum, mean, max, min)
+```
+
+#### folha
+```{r}
+sum = rowSums(folha_tokenized_polarity[,c(2:395)], na.rm = TRUE)
+mean = sum/nonNA_folha
+max = rowMaxs(as.matrix(folha_tokenized_polarity[,c(2:395)]))
+min = rowMins(as.matrix(folha_tokenized_polarity[,c(2:395)]))
+
+folha_tokenized_polarity$sum <- sum
+folha_tokenized_polarity$mean <- mean
+folha_tokenized_polarity$max <- max
+folha_tokenized_polarity$min <- min
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  select(date, sum, mean, max, min, everything())
+
+folha_df <- folha_tokenized_polarity %>%
+  select(date, sum, mean, max, min)
+```
+
+## aggregate by date
+```{r}
+osp_sentiment <- osp_df %>%
+  group_by(date) %>%
+  summarise(sentiment_mean = mean(mean))
+
+write_csv(osp_sentiment, "/Users/jiaxuan/Dropbox/sp_results/processed_data/osp_df1.csv")
+```
+
+```{r}
+folha_sentiment <- folha_df %>%
+  group_by(date) %>%
+  summarise(sentiment_mean = mean(mean))
+
+write_csv(folha_sentiment, "/Users/jiaxuan/Dropbox/sp_results/processed_data/folha_df1.csv")
+```
+
+# B) transformed text
+```{r, message=F, error=F}
+SP_covid <- read_csv("SP_covid.csv")
+osp_text <- read_csv("sample/osp_v1_lem_rmstopwords.csv")
+folha_text <- read_csv("sample/folha_v1_lem_rmstopwords.csv")
+osp_tokenized <- read_csv("sample/osp_v1tokenized_lem_rmstopwords.csv")
+folha_tokenized <- read_csv("sample/folha_v1tokenized_lem_rmstopwords.csv")
+osp_tokenized_polarity <- read_csv("sample/osp_v1tokenized_lem_rmstopwords_textblob_polarity.csv")
+folha_tokenized_polarity <- read_csv("sample/folha_v1tokenized_lem_rmstopwords_textblob_polarity.csv")
+```
+
+```{r}
+folha_date <- dmy(folha_text$folha_de_sp_date)
+folha_text$date <- folha_date
+osp_date <- dmy(osp_text$o_estado_de_sp_date)
+osp_text$date <- osp_date
+```
+
+```{r}
+SP_covid$date <- ymd(SP_covid$date)
+SP_covid <- arrange(SP_covid, date)
+```
+
+```{r}
+osp_tokenized$date <- osp_text$date
+osp_tokenized_polarity$date <- osp_text$date
+
+osp_tokenized <- osp_tokenized %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+```
+
+```{r}
+folha_tokenized$date <- folha_text$date
+folha_tokenized_polarity$date <- folha_text$date
+
+folha_tokenized <- folha_tokenized %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+```
+
+combine df
+```{r}
+SP_covid<- SP_covid[c(1:311),]
+```
+
+```{r}
+osp_tokenized <- osp_tokenized %>%
+  filter(date %in% SP_covid$date)
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  filter(date %in% SP_covid$date)
+
+folha_tokenized <- folha_tokenized %>%
+  filter(date %in% SP_covid$date)
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  filter(date %in% SP_covid$date)
+```
+
+## mean, sum, max, min
+```{r}
+nonNA_osp <- rowSums(!is.na(osp_tokenized))
+osp_tokenized_polarity$nonNA_value <- nonNA_osp
+
+nonNA_folha <- rowSums(!is.na(folha_tokenized))
+folha_tokenized_polarity$nonNA_value <- nonNA_folha
+```
+
+#### osp
+```{r, warning=F}
+sum = rowSums(osp_tokenized_polarity[,c(2:479)], na.rm = TRUE)
+mean = sum/nonNA_osp
+max = rowMaxs(as.matrix(osp_tokenized_polarity[,c(2:479)]))
+min = rowMins(as.matrix(osp_tokenized_polarity[,c(2:479)]))
+
+osp_tokenized_polarity$sum <- sum
+osp_tokenized_polarity$mean <- mean
+osp_tokenized_polarity$max <- max
+osp_tokenized_polarity$min <- min
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  select(date, sum, mean, max, min, everything())
+
+osp_df <- osp_tokenized_polarity %>%
+  select(date, sum, mean, max, min)
+```
+
+#### folha
+```{r}
+sum = rowSums(folha_tokenized_polarity[,c(2:395)], na.rm = TRUE)
+mean = sum/nonNA_folha
+max = rowMaxs(as.matrix(folha_tokenized_polarity[,c(2:395)]))
+min = rowMins(as.matrix(folha_tokenized_polarity[,c(2:395)]))
+
+folha_tokenized_polarity$sum <- sum
+folha_tokenized_polarity$mean <- mean
+folha_tokenized_polarity$max <- max
+folha_tokenized_polarity$min <- min
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  select(date, sum, mean, max, min, everything())
+
+folha_df <- folha_tokenized_polarity %>%
+  select(date, sum, mean, max, min)
+```
+
+## aggregate by date
+```{r}
+osp_sentiment <- osp_df %>%
+  group_by(date) %>%
+  summarise(sentiment_mean = mean(mean))
+
+write_csv(osp_sentiment, "/Users/jiaxuan/Dropbox/sp_results/processed_data/osp_df2.csv")
+```
+
+```{r}
+folha_sentiment <- folha_df %>%
+  group_by(date) %>%
+  summarise(sentiment_mean = mean(mean))
+
+write_csv(folha_sentiment, "/Users/jiaxuan/Dropbox/sp_results/processed_data/folha_df2.csv")
+```
+
+
+# c) New datasets
+
+## dfs containing mean, sum, max, min
+```{r, message=F, error=F}
+SP_covid <- read_csv("SP_covid.csv")
+osp_text <- read_csv("sample/osp_v1_lem_rmstopwords.csv")
+folha_text <- read_csv("sample/folha_v1_lem_rmstopwords.csv")
+osp_tokenized <- read_csv("sample/osp_v1tokenized_lem_rmstopwords.csv")
+folha_tokenized <- read_csv("sample/folha_v1tokenized_lem_rmstopwords.csv")
+osp_tokenized_polarity <- read_csv("sample/osp_v1tokenized_lem_rmstopwords_textblob_polarity.csv")
+folha_tokenized_polarity <- read_csv("sample/folha_v1tokenized_lem_rmstopwords_textblob_polarity.csv")
+```
+
+```{r}
+SP_covid$date <- ymd(SP_covid$date)
+SP_covid <- arrange(SP_covid, date)
+```
+
+```{r}
+folha_date <- dmy(folha_text$folha_de_sp_date)
+folha_text$date <- folha_date
+osp_date <- dmy(osp_text$o_estado_de_sp_date)
+osp_text$date <- osp_date
+```
+
+```{r}
+osp_tokenized$date <- osp_text$date
+osp_tokenized_polarity$date <- osp_text$date
+
+osp_tokenized <- osp_tokenized %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+```
+
+```{r}
+folha_tokenized$date <- folha_text$date
+folha_tokenized_polarity$date <- folha_text$date
+
+folha_tokenized <- folha_tokenized %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+```
+
+filter by date
+```{r}
+SP_covid<- SP_covid[c(1:311),]
+```
+
+```{r}
+osp_tokenized <- osp_tokenized %>%
+  filter(date %in% SP_covid$date)
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  filter(date %in% SP_covid$date)
+
+folha_tokenized <- folha_tokenized %>%
+  filter(date %in% SP_covid$date)
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  filter(date %in% SP_covid$date)
+```
+
+## mean, sum, max, min
+```{r}
+nonNA_osp <- rowSums(!is.na(osp_tokenized))
+osp_tokenized_polarity$nonNA_value <- nonNA_osp
+
+nonNA_folha <- rowSums(!is.na(folha_tokenized))
+folha_tokenized_polarity$nonNA_value <- nonNA_folha
+```
+
+#### osp
+```{r, warning=F}
+sum = rowSums(osp_tokenized_polarity[,c(2:479)], na.rm = TRUE)
+mean = sum/nonNA_osp
+max = rowMaxs(as.matrix(osp_tokenized_polarity[,c(2:479)]))
+min = rowMins(as.matrix(osp_tokenized_polarity[,c(2:479)]))
+
+osp_tokenized_polarity$osp_sum <- sum
+osp_tokenized_polarity$osp_mean <- mean
+osp_tokenized_polarity$osp_max <- max
+osp_tokenized_polarity$osp_min <- min
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  select(date, osp_sum, osp_mean, osp_max, osp_min, everything())
+
+osp_df <- osp_tokenized_polarity %>%
+  select(date, osp_sum, osp_mean, osp_max, osp_min)
+```
+
+#### folha
+```{r}
+sum = rowSums(folha_tokenized_polarity[,c(2:395)], na.rm = TRUE)
+mean = sum/nonNA_folha
+max = rowMaxs(as.matrix(folha_tokenized_polarity[,c(2:395)]))
+min = rowMins(as.matrix(folha_tokenized_polarity[,c(2:395)]))
+
+folha_tokenized_polarity$folha_sum <- sum
+folha_tokenized_polarity$folha_mean <- mean
+folha_tokenized_polarity$folha_max <- max
+folha_tokenized_polarity$folha_min <- min
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  select(date, folha_sum, folha_mean, folha_max, folha_min, everything())
+
+folha_df <- folha_tokenized_polarity %>%
+  select(date, folha_sum, folha_mean, folha_max, folha_min)
+```
+
+```{r}
+write_csv(osp_df, "/Users/jiaxuan/Dropbox/sp_results/processed_data/osp_data.csv")
+write_csv(folha_df, "/Users/jiaxuan/Dropbox/sp_results/processed_data/folha_data.csv")
+```
+
+
+
+
+
+
+# d) COVID New datasets
+
+## dfs containing mean, sum, max, min
+```{r, message=F, error=F}
+SP_covid <- read_csv("SP_covid.csv")
+osp_text <- read_csv("sample/osp_v2_lem_rmstopwords_covid.csv")
+folha_text <- read_csv("sample/folha_v2_lem_rmstopwords_covid.csv")
+osp_tokenized <- read_csv("sample/osp_v2tokenized_lem_rmstopwords_covid.csv")
+folha_tokenized <- read_csv("sample/folha_v2tokenized_lem_rmstopwords_covid.csv")
+osp_tokenized_polarity <- read_csv("sample/osp_v2tokenized_lem_rmstopwords_covid_textblob_polarity.csv")
+folha_tokenized_polarity <- read_csv("sample/folha_v2tokenized_lem_rmstopwords_covid_textblob_polarity.csv")
+```
+
+```{r}
+SP_covid$date <- ymd(SP_covid$date)
+SP_covid <- arrange(SP_covid, date)
+```
+
+```{r}
+folha_date <- dmy(folha_text$folha_de_sp_date)
+folha_text$date <- folha_date
+osp_date <- dmy(osp_text$o_estado_de_sp_date)
+osp_text$date <- osp_date
+```
+
+```{r}
+osp_tokenized$date <- osp_text$date
+osp_tokenized_polarity$date <- osp_text$date
+
+osp_tokenized <- osp_tokenized %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+```
+
+```{r}
+folha_tokenized$date <- folha_text$date
+folha_tokenized_polarity$date <- folha_text$date
+
+folha_tokenized <- folha_tokenized %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+```
+
+filter by date
+```{r}
+SP_covid<- SP_covid[c(1:311),]
+```
+
+```{r}
+osp_tokenized <- osp_tokenized %>%
+  filter(date %in% SP_covid$date)
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  filter(date %in% SP_covid$date)
+
+folha_tokenized <- folha_tokenized %>%
+  filter(date %in% SP_covid$date)
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  filter(date %in% SP_covid$date)
+```
+
+## mean, sum, max, min
+```{r}
+nonNA_osp <- rowSums(!is.na(osp_tokenized))
+osp_tokenized_polarity$nonNA_value <- nonNA_osp
+
+nonNA_folha <- rowSums(!is.na(folha_tokenized))
+folha_tokenized_polarity$nonNA_value <- nonNA_folha
+```
+
+#### osp
+```{r, warning=F}
+sum = rowSums(osp_tokenized_polarity[,c(2:411)], na.rm = TRUE)
+mean = sum/nonNA_osp
+max = rowMaxs(as.matrix(osp_tokenized_polarity[,c(2:411)]))
+min = rowMins(as.matrix(osp_tokenized_polarity[,c(2:411)]))
+
+osp_tokenized_polarity$osp_sum <- sum
+osp_tokenized_polarity$osp_mean <- mean
+osp_tokenized_polarity$osp_max <- max
+osp_tokenized_polarity$osp_min <- min
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  select(date, osp_sum, osp_mean, osp_max, osp_min, everything())
+
+osp_df <- osp_tokenized_polarity %>%
+  select(date, osp_sum, osp_mean, osp_max, osp_min)
+```
+
+#### folha
+```{r}
+sum = rowSums(folha_tokenized_polarity[,c(2:280)], na.rm = TRUE)
+mean = sum/nonNA_folha
+max = rowMaxs(as.matrix(folha_tokenized_polarity[,c(2:280)]))
+min = rowMins(as.matrix(folha_tokenized_polarity[,c(2:280)]))
+
+folha_tokenized_polarity$folha_sum <- sum
+folha_tokenized_polarity$folha_mean <- mean
+folha_tokenized_polarity$folha_max <- max
+folha_tokenized_polarity$folha_min <- min
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  select(date, folha_sum, folha_mean, folha_max, folha_min, everything())
+
+folha_df <- folha_tokenized_polarity %>%
+  select(date, folha_sum, folha_mean, folha_max, folha_min)
+```
+
+```{r}
+write_csv(osp_df, "/Users/jiaxuan/Dropbox/sp_results/processed_data/osp_data_covid.csv")
+write_csv(folha_df, "/Users/jiaxuan/Dropbox/sp_results/processed_data/folha_data_covid.csv")
+```
+
+
+
+# finalized 1
+```{r, message=F, error=F}
+SP_covid <- read_csv("SP_covid.csv")
+SP_covid$date <- ymd(SP_covid$date)
+SP_covid <- arrange(SP_covid, date)
+SP_covid<- SP_covid[c(1:311),]
+SP_covid <- SP_covid %>% rename(case_fatality_rate = case_fatility_rate)
+osp_df1 <- read_csv("processed_data/osp_data.csv")
+folha_df1 <- read_csv("processed_data/folha_data.csv")
+```
+
+aggregate sentiment score data by date, combine osp and folha as one new df
+```{r}
+osp_df2 <- osp_df1 %>%
+  group_by(date) %>%
+  summarise(mean = mean(osp_mean), sum = mean(osp_sum), max = max(osp_max), min = min(osp_min))
+
+folha_df2 <- folha_df1 %>%
+  group_by(date) %>%
+  summarise(mean = mean(folha_mean), sum = mean(folha_sum), max = max(folha_max), min = min(folha_min))
+
+new_df <- data.frame(matrix(ncol = 1, nrow = 311))
+colnames(new_df) <- c("date")
+
+new_df$date <- folha_df2$date
+new_df <- left_join(new_df, folha_df2, by = c("date"))
+new_df <- left_join(new_df, osp_df2, by = c("date"))
+
+new_df <- new_df %>%
+  mutate(mean = (mean.x+mean.y)/2, sum = (sum.x+sum.y)/2, max = pmax(max.x,max.y), min = pmin(min.x, min.y)) %>%
+  select(date, mean, sum, max, min)
+
+new_df[c(7,77,81,127,128,130,139,141,143,154,229,308,311),] <- 
+  folha_df2[c(7,77,81,127,128,130,139,141,143,154,229,308,311),]
+
+SP_covid <- SP_covid[, -c(2:4,13,16:19)]
+
+SP_covid <- SP_covid %>%
+  mutate(newCases = log(1+newCases),
+         totalCases = log(totalCases),
+         newDeaths = log(1+newDeaths),
+         totalDeaths = log(totalDeaths),
+         tests = log(tests),
+         case_fatality_rate = log(1+case_fatality_rate),
+         prevalence = log(prevalence)) ###same classic transformation
+
+#SP_covid <- SP_covid %>%
+#  mutate(newCases = log(newCases),
+#         totalCases = log(totalCases),
+#         newDeaths = log(newDeaths),
+#         totalDeaths = log(totalDeaths),
+#         tests = log(tests),
+#         case_fatality_rate = log(case_fatality_rate),
+#         prevalence = log(prevalence)) %>%
+#  mutate_at(c("newCases", "totalCases", "newDeaths", "totalDeaths", "tests", "case_fatality_rate", "prevalence") ,function(x) ifelse(is.infinite(x), 0, x)) ###replace -Inf by 0
+
+#SP_covid <- SP_covid %>%
+#  mutate(newCases = log(newCases),
+#         totalCases = log(totalCases),
+#         newDeaths = log(newDeaths),
+#         totalDeaths = log(totalDeaths),
+#         tests = log(tests),
+#         case_fatality_rate = log(case_fatality_rate),
+#         prevalence = log(prevalence)) %>%
+#  mutate_at(c("newCases", "totalCases", "newDeaths", "totalDeaths", "tests", "case_fatality_rate", "prevalence") ,function(x) ifelse(is.infinite(x), NA, x)) ###replace -Inf by NA
+
+```
+
+```{r}
+# demean
+osp_df3 <- osp_df2 %>%
+  summarise(demean_mean = mean - mean(mean),
+            demean_sum = sum - mean(sum),
+            demean_max = max - mean(max),
+            demean_min = min - mean(min))
+osp_df3$date <- osp_df2$date
+osp_df3 <- select(osp_df3, date, everything())
+
+folha_df3 <- folha_df2 %>%
+  summarise(demean_mean = mean - mean(mean),
+            demean_sum = sum - mean(sum),
+            demean_max = max - mean(max),
+            demean_min = min - mean(min))  
+folha_df3$date <- folha_df2$date
+folha_df3 <- select(folha_df3, date, everything())
+
+new_df1 <- data.frame(matrix(ncol = 1, nrow = 311))
+colnames(new_df1) <- c("date")
+
+new_df1$date <- folha_df3$date
+new_df1 <- left_join(new_df1, folha_df3, by = c("date"))
+new_df1 <- left_join(new_df1, osp_df3, by = c("date"))
+
+new_df1 <- new_df1 %>%
+  mutate(demean_mean = (demean_mean.x+demean_mean.y)/2, 
+         demean_sum = (demean_sum.x+demean_sum.y)/2, 
+         demean_max = pmax(demean_max.x,demean_max.y), 
+         demean_min = pmin(demean_min.x, demean_min.y)) %>%
+  select(date, demean_mean, demean_sum, demean_max, demean_min)
+
+new_df1[c(7,77,81,127,128,130,139,141,143,154,229,308,311),] <-
+  folha_df3[c(7,77,81,127,128,130,139,141,143,154,229,308,311),]
+
+new_df2 <- left_join(new_df, new_df1, by = "date")
+```
+
+```{r}
+write_csv(new_df2, "/Users/jiaxuan/Dropbox/sp_results/processed_data/combined_sentiment_final.csv")
+```
+
+
+```{r}
+# pct
+#new_df2 <- new_df %>%
+ # mutate(pct_mean = (mean - lag(mean, 1))/lag(mean, 1),
+  #       pct_sum = (sum - lag(sum, 1))/lag(sum, 1),
+   #      pct_max = (max - lag(max, 1))/lag(max, 1),
+    #     pct_min = (min - lag(min, 1))/lag(min, 1))
+#new_df2 <- new_df2[, -c(6:10)]
+# demean
+#dm_mean <- mean(new_df2$mean)
+#dm_sum <- mean(new_df2$sum)
+#dm_max <- mean(new_df2$max)
+#dm_min <- mean(new_df2$min)
+
+#new_df2 <- new_df2 %>%
+ # mutate(demean_mean = mean - dm_mean,
+  #       demean_sum = sum - dm_sum,
+   #      demean_max = max - dm_max,
+    #     demean_min = min - dm_min)
+
+new_df3 <- left_join(new_df2, SP_covid, by = "date")
+```
+
+```{r}
+## define useful functions
+## create a function to aggregate by 3 days
+rep3 <- function(d){
+ d$period3 =  rep(1:ceiling(nrow(d)/3), each = 3)[1:nrow(d)]
+ d
+}
+
+## weekofmonth function
+wom1 <- function(vector){
+  i = 1
+  wkofmo <- vector()
+  for (i in (1:length(vector))) {
+    if(mday(vector[i])<=7){wkofmo[i] <- 1}
+    if(mday(vector[i])>7 & mday(vector[i])<=14){wkofmo[i] <- 2}
+    if(mday(vector[i])>14 & mday(vector[i])<=21){wkofmo[i] <- 3}
+    if(mday(vector[i])>21 & mday(vector[i])<=28){wkofmo[i] <- 4}
+    if(mday(vector[i])>28 & mday(vector[i])<=31){wkofmo[i] <- 5}
+    i = i+1
+  }
+  wkofmo
+}
+```
+
+```{r}
+new_df3$month <- month(new_df3$date)
+new_df3$dayofwk <- wday(new_df3$date) ##day of week
+#new_df3$wkofmo <- stri_datetime_fields(new_df3$date)$WeekOfMonth
+new_df3$wkofmo <- wom1(new_df3$date)
+
+new_df3 <- select(new_df3, date, month, dayofwk, wkofmo, everything())
+```
+
+```{r}
+new_df4 <- rep3(new_df3)
+
+new_df4 <- new_df4 %>% 
+  select(date, period3, everything()) %>%
+  group_by(period3) %>%
+  summarize(date = date[2],
+            month = month[2],
+            dayofwk = dayofwk[2],
+            wkofmo = wkofmo[2],
+            mean = mean(mean),
+            sum = mean(sum),
+            max = mean(max),
+            min = mean(min),
+            demean_mean = mean(demean_mean),
+            demean_sum = mean(demean_sum),
+            demean_max = mean(demean_max),
+            demean_min = mean(demean_min),
+            newCases = mean(newCases),
+            totalCases = mean(totalCases),
+            newDeaths = mean(newDeaths),
+            totalDeaths = mean(totalDeaths),
+            tests = mean(tests), 
+            case_fatality_rate = mean(case_fatality_rate),
+            prevalence = mean(prevalence))  
+```
+
+
+quarter fixed
+```{r}
+new_df3$quarter <- quarter(new_df3$date)
+```
+
+```{r}
+new_df4$quarter <- quarter(new_df4$date)
+```
+
+## *emergency decisions and policy response in 2020*
+3.13 Start of lockdown
+3.24 Decree of quarantine and social distancing guidelines [socialdis = 1]
+4.20 MOH started to ease social isolation guidelines (lockdown between 3.13 and 4.20) [lockdown = 1]
+6.20 Trial of Oxford COVID-19 vaccine and Sinovac vaccine started [vactrial = 1]
+12.12 Brazilian government unveiled its national vaccination plan against Covid-19 [vacplan = 1]
+
+**Reference: **
+https://noticias.uol.com.br/saude/ultimas-noticias/redacao/2020/04/07/sp-tera-hospital-de-campanha-contra-covid-19-no-complexo-do-ibirapuera.htm  
+https://www.nytimes.com/article/brazil-coronavirus-cases.html  
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7214305/  
+https://clinicaltrials.gov/ct2/show/NCT04456595  
+https://covid19vaccinetrial.co.uk/brazil-trial-launch  
+https://www.straitstimes.com/world/brazil-to-roll-out-covid-19-vaccination-in-first-half-of-2021  
+https://en.wikipedia.org/wiki/COVID-19_pandemic_in_Brazil#cite_note-40  
+https://www.scielo.br/j/eins/a/VFchpPrYBTJBmDgrbPpFFtk/?lang=en#  
+
+
+dd in dummy variables
+```{r}
+new_df3$lockdown <- 0
+new_df3$socialdis <- 0
+new_df3$vactrial <- 0
+new_df3$vacplan <- 0
+new_df3 <- new_df3 %>%
+  select(date, lockdown, socialdis, vactrial, vacplan, everything())
+```
+
+```{r}
+new_df3$lockdown[18:56] <- 1
+new_df3$socialdis[29:311] <- 1
+new_df3$vactrial[117:311] <- 1
+new_df3$vacplan[292:311] <-1
+```
+
+```{r}
+new_df4$lockdown <- 0
+new_df4$socialdis <- 0
+new_df4$vactrial <- 0
+new_df4$vacplan <- 0
+new_df4 <- new_df4 %>%
+  select(date, lockdown, socialdis, vactrial, vacplan, everything())
+```
+
+```{r}
+new_df4$lockdown[7:19] <- 1
+new_df4$socialdis[10:104] <- 1
+new_df4$vactrial[40:104] <- 1
+new_df4$vacplan[98:104] <-1
+```
+
+```{r}
+write_csv(new_df3, "/Users/jiaxuan/Dropbox/sp_results/processed_data/new_df3_y.csv")
+write_csv(new_df4, "/Users/jiaxuan/Dropbox/sp_results/processed_data/new_df4_y.csv")
+```
+
+
+
+## transform log(1+y)
+```{r, warning = F}
+new_df5 <- new_df3 %>%
+  mutate(mean = log(1+mean),
+         sum = log(1+sum),
+         max = log(1+max),
+         min = log(2+min),
+         demean_mean = log(1+demean_mean),
+         demean_sum = log(1+demean_sum),
+         demean_max = log(1+demean_max),
+         demean_min = log(1+demean_min)
+         ) %>%
+  mutate_at(c("sum", "demean_sum") ,function(x) ifelse(is.nan(x), NA, x))
+```
+
+
+```{r, warning=F}
+new_df6 <- new_df4 %>%
+  mutate(mean = log(1+mean),
+         sum = log(1+sum),
+         max = log(1+max),
+         min = log(2+min),
+         demean_mean = log(1+demean_mean),
+         demean_sum = log(1+demean_sum),
+         demean_max = log(1+demean_max),
+         demean_min = log(1+demean_min)
+         ) %>%
+  mutate_at(c("demean_sum") ,function(x) ifelse(is.nan(x), NA, x))
+```
+
+```{r}
+write_csv(new_df5, "/Users/jiaxuan/Dropbox/sp_results/processed_data/new_df3_log.csv")
+write_csv(new_df6, "/Users/jiaxuan/Dropbox/sp_results/processed_data/new_df4_log.csv")
+```
+
+
+# finalized 2
+```{r, message=F, error=F}
+SP_covid <- read_csv("SP_covid.csv")
+SP_covid$date <- ymd(SP_covid$date)
+SP_covid <- arrange(SP_covid, date)
+SP_covid<- SP_covid[c(1:311),]
+SP_covid <- SP_covid %>% rename(case_fatality_rate = case_fatility_rate)
+osp_df1 <- read_csv("processed_data/osp_data.csv")
+folha_df1 <- read_csv("processed_data/folha_data.csv")
+```
+
+aggregate sentiment score data by date, combine osp and folha as one new df
+```{r}
+osp_df2 <- osp_df1 %>%
+  group_by(date) %>%
+  summarise(mean = mean(osp_mean), sum = mean(osp_sum), max = max(osp_max), min = min(osp_min))
+
+folha_df2 <- folha_df1 %>%
+  group_by(date) %>%
+  summarise(mean = mean(folha_mean), sum = mean(folha_sum), max = max(folha_max), min = min(folha_min))
+
+new_df <- data.frame(matrix(ncol = 1, nrow = 311))
+colnames(new_df) <- c("date")
+
+new_df$date <- folha_df2$date
+new_df <- left_join(new_df, folha_df2, by = c("date"))
+new_df <- left_join(new_df, osp_df2, by = c("date"))
+
+new_df <- new_df %>%
+  mutate(mean = (mean.x+mean.y)/2, sum = (sum.x+sum.y)/2, max = (max.x+max.y)/2, min = (min.x+min.y)/2) %>%
+  select(date, mean, sum, max, min)
+
+new_df[c(7,77,81,127,128,130,139,141,143,154,229,308,311),] <- 
+  folha_df2[c(7,77,81,127,128,130,139,141,143,154,229,308,311),]
+
+SP_covid <- SP_covid[, -c(2:4,13,16:19)]
+
+SP_covid <- SP_covid %>%
+  mutate(newCases = log(1+newCases),
+         totalCases = log(totalCases),
+         newDeaths = log(1+newDeaths),
+         totalDeaths = log(totalDeaths),
+         tests = log(tests),
+         case_fatality_rate = log(1+case_fatality_rate),
+         prevalence = log(prevalence)) ###same classic transformation
+
+#SP_covid <- SP_covid %>%
+#  mutate(newCases = log(newCases),
+#         totalCases = log(totalCases),
+#         newDeaths = log(newDeaths),
+#         totalDeaths = log(totalDeaths),
+#         tests = log(tests),
+#         case_fatality_rate = log(case_fatality_rate),
+#         prevalence = log(prevalence)) %>%
+#  mutate_at(c("newCases", "totalCases", "newDeaths", "totalDeaths", "tests", "case_fatality_rate", "prevalence") ,function(x) ifelse(is.infinite(x), 0, x)) ###replace -Inf by 0
+
+#SP_covid <- SP_covid %>%
+#  mutate(newCases = log(newCases),
+#         totalCases = log(totalCases),
+#         newDeaths = log(newDeaths),
+#         totalDeaths = log(totalDeaths),
+#         tests = log(tests),
+#         case_fatality_rate = log(case_fatality_rate),
+#         prevalence = log(prevalence)) %>%
+#  mutate_at(c("newCases", "totalCases", "newDeaths", "totalDeaths", "tests", "case_fatality_rate", "prevalence") ,function(x) ifelse(is.infinite(x), NA, x)) ###replace -Inf by NA
+
+```
+
+```{r}
+# demean
+osp_df3 <- osp_df2 %>%
+  summarise(demean_mean = mean - mean(mean),
+            demean_sum = sum - mean(sum),
+            demean_max = max - mean(max),
+            demean_min = min - mean(min))
+osp_df3$date <- osp_df2$date
+osp_df3 <- select(osp_df3, date, everything())
+
+folha_df3 <- folha_df2 %>%
+  summarise(demean_mean = mean - mean(mean),
+            demean_sum = sum - mean(sum),
+            demean_max = max - mean(max),
+            demean_min = min - mean(min))  
+folha_df3$date <- folha_df2$date
+folha_df3 <- select(folha_df3, date, everything())
+
+new_df1 <- data.frame(matrix(ncol = 1, nrow = 311))
+colnames(new_df1) <- c("date")
+
+new_df1$date <- folha_df3$date
+new_df1 <- left_join(new_df1, folha_df3, by = c("date"))
+new_df1 <- left_join(new_df1, osp_df3, by = c("date"))
+
+new_df1 <- new_df1 %>%
+  mutate(demean_mean = (demean_mean.x+demean_mean.y)/2, 
+         demean_sum = (demean_sum.x+demean_sum.y)/2, 
+         demean_max = (demean_max.x+demean_max.y)/2, 
+         demean_min = (demean_min.x+demean_min.y)/2) %>%
+  select(date, demean_mean, demean_sum, demean_max, demean_min)
+
+new_df1[c(7,77,81,127,128,130,139,141,143,154,229,308,311),] <-
+  folha_df3[c(7,77,81,127,128,130,139,141,143,154,229,308,311),]
+
+new_df2 <- left_join(new_df, new_df1, by = "date")
+```
+
+```{r}
+write_csv(new_df2, "/Users/jiaxuan/Dropbox/sp_results/processed_data/combined_sent_final.csv")
+```
+
+
+```{r}
+# pct
+#new_df2 <- new_df %>%
+ # mutate(pct_mean = (mean - lag(mean, 1))/lag(mean, 1),
+  #       pct_sum = (sum - lag(sum, 1))/lag(sum, 1),
+   #      pct_max = (max - lag(max, 1))/lag(max, 1),
+    #     pct_min = (min - lag(min, 1))/lag(min, 1))
+#new_df2 <- new_df2[, -c(6:10)]
+# demean
+#dm_mean <- mean(new_df2$mean)
+#dm_sum <- mean(new_df2$sum)
+#dm_max <- mean(new_df2$max)
+#dm_min <- mean(new_df2$min)
+
+#new_df2 <- new_df2 %>%
+ # mutate(demean_mean = mean - dm_mean,
+  #       demean_sum = sum - dm_sum,
+   #      demean_max = max - dm_max,
+    #     demean_min = min - dm_min)
+
+new_df3 <- left_join(new_df2, SP_covid, by = "date")
+```
+
+```{r}
+## define useful functions
+## create a function to aggregate by 3 days
+rep3 <- function(d){
+ d$period3 =  rep(1:ceiling(nrow(d)/3), each = 3)[1:nrow(d)]
+ d
+}
+
+## weekofmonth function
+wom1 <- function(vector){
+  i = 1
+  wkofmo <- vector()
+  for (i in (1:length(vector))) {
+    if(mday(vector[i])<=7){wkofmo[i] <- 1}
+    if(mday(vector[i])>7 & mday(vector[i])<=14){wkofmo[i] <- 2}
+    if(mday(vector[i])>14 & mday(vector[i])<=21){wkofmo[i] <- 3}
+    if(mday(vector[i])>21 & mday(vector[i])<=28){wkofmo[i] <- 4}
+    if(mday(vector[i])>28 & mday(vector[i])<=31){wkofmo[i] <- 5}
+    i = i+1
+  }
+  wkofmo
+}
+```
+
+```{r}
+new_df3$month <- month(new_df3$date)
+new_df3$dayofwk <- wday(new_df3$date) ##day of week
+#new_df3$wkofmo <- stri_datetime_fields(new_df3$date)$WeekOfMonth
+new_df3$wkofmo <- wom1(new_df3$date)
+
+new_df3 <- select(new_df3, date, month, dayofwk, wkofmo, everything())
+```
+
+```{r}
+new_df4 <- rep3(new_df3)
+
+new_df4 <- new_df4 %>% 
+  select(date, period3, everything()) %>%
+  group_by(period3) %>%
+  summarize(date = date[2],
+            month = month[2],
+            dayofwk = dayofwk[2],
+            wkofmo = wkofmo[2],
+            mean = mean(mean),
+            sum = mean(sum),
+            max = mean(max),
+            min = mean(min),
+            demean_mean = mean(demean_mean),
+            demean_sum = mean(demean_sum),
+            demean_max = mean(demean_max),
+            demean_min = mean(demean_min),
+            newCases = mean(newCases),
+            totalCases = mean(totalCases),
+            newDeaths = mean(newDeaths),
+            totalDeaths = mean(totalDeaths),
+            tests = mean(tests), 
+            case_fatality_rate = mean(case_fatality_rate),
+            prevalence = mean(prevalence))  
+```
+
+
+quarter fixed
+```{r}
+new_df3$quarter <- quarter(new_df3$date)
+```
+
+```{r}
+new_df4$quarter <- quarter(new_df4$date)
+```
+
+## *emergency decisions and policy response in 2020*
+3.13 Start of lockdown
+3.24 Decree of quarantine and social distancing guidelines [socialdis = 1]
+4.20 MOH started to ease social isolation guidelines (lockdown between 3.13 and 4.20) [lockdown = 1]
+6.20 Trial of Oxford COVID-19 vaccine and Sinovac vaccine started [vactrial = 1]
+12.12 Brazilian government unveiled its national vaccination plan against Covid-19 [vacplan = 1]
+
+**Reference: **
+https://noticias.uol.com.br/saude/ultimas-noticias/redacao/2020/04/07/sp-tera-hospital-de-campanha-contra-covid-19-no-complexo-do-ibirapuera.htm  
+https://www.nytimes.com/article/brazil-coronavirus-cases.html  
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7214305/  
+https://clinicaltrials.gov/ct2/show/NCT04456595  
+https://covid19vaccinetrial.co.uk/brazil-trial-launch  
+https://www.straitstimes.com/world/brazil-to-roll-out-covid-19-vaccination-in-first-half-of-2021  
+https://en.wikipedia.org/wiki/COVID-19_pandemic_in_Brazil#cite_note-40  
+https://www.scielo.br/j/eins/a/VFchpPrYBTJBmDgrbPpFFtk/?lang=en#  
+
+
+dd in dummy variables
+```{r}
+new_df3$lockdown <- 0
+new_df3$socialdis <- 0
+new_df3$vactrial <- 0
+new_df3$vacplan <- 0
+new_df3 <- new_df3 %>%
+  select(date, lockdown, socialdis, vactrial, vacplan, everything())
+```
+
+```{r}
+new_df3$lockdown[18:56] <- 1
+new_df3$socialdis[29:311] <- 1
+new_df3$vactrial[117:311] <- 1
+new_df3$vacplan[292:311] <-1
+```
+
+```{r}
+new_df4$lockdown <- 0
+new_df4$socialdis <- 0
+new_df4$vactrial <- 0
+new_df4$vacplan <- 0
+new_df4 <- new_df4 %>%
+  select(date, lockdown, socialdis, vactrial, vacplan, everything())
+```
+
+```{r}
+new_df4$lockdown[7:19] <- 1
+new_df4$socialdis[10:104] <- 1
+new_df4$vactrial[40:104] <- 1
+new_df4$vacplan[98:104] <-1
+```
+
+```{r}
+write_csv(new_df3, "/Users/jiaxuan/Dropbox/sp_results/processed_data/combined_df3_y.csv")
+write_csv(new_df4, "/Users/jiaxuan/Dropbox/sp_results/processed_data/combined_df4_y.csv")
+```
+
+
+
+## transform log(1+y)
+```{r, warning = F}
+new_df5 <- new_df3 %>%
+  mutate(mean = log(1+mean),
+         sum = log(1+sum),
+         max = log(1+max),
+         min = log(2+min),
+         demean_mean = log(1+demean_mean),
+         demean_sum = log(1+demean_sum),
+         demean_max = log(1+demean_max),
+         demean_min = log(1+demean_min)
+         ) %>%
+  mutate_at(c("sum", "demean_sum") ,function(x) ifelse(is.nan(x), NA, x))
+```
+
+
+```{r, warning=F}
+new_df6 <- new_df4 %>%
+  mutate(mean = log(1+mean),
+         sum = log(1+sum),
+         max = log(1+max),
+         min = log(2+min),
+         demean_mean = log(1+demean_mean),
+         demean_sum = log(1+demean_sum),
+         demean_max = log(1+demean_max),
+         demean_min = log(1+demean_min)
+         ) %>%
+  mutate_at(c("demean_sum") ,function(x) ifelse(is.nan(x), NA, x))
+```
+
+```{r}
+write_csv(new_df5, "/Users/jiaxuan/Dropbox/sp_results/processed_data/combined_df3_log.csv")
+write_csv(new_df6, "/Users/jiaxuan/Dropbox/sp_results/processed_data/combined_df4_log.csv")
+```
+
+
+
+# for descriptive statistics
+```{r, message=F, error=F}
+SP_covid <- read_csv("SP_covid.csv")
+SP_covid$date <- ymd(SP_covid$date)
+SP_covid <- arrange(SP_covid, date)
+SP_covid<- SP_covid[c(1:311),]
+SP_covid <- SP_covid %>% rename(case_fatality_rate = case_fatility_rate)
+osp_df1 <- read_csv("processed_data/osp_data.csv")
+folha_df1 <- read_csv("processed_data/folha_data.csv")
+```
+
+aggregate sentiment score data by date, combine osp and folha as one new df
+```{r}
+osp_df2 <- osp_df1 %>%
+  group_by(date) %>%
+  summarise(mean = mean(osp_mean), sum = mean(osp_sum), max = max(osp_max), min = min(osp_min))
+
+folha_df2 <- folha_df1 %>%
+  group_by(date) %>%
+  summarise(mean = mean(folha_mean), sum = mean(folha_sum), max = max(folha_max), min = min(folha_min))
+
+new_df <- data.frame(matrix(ncol = 1, nrow = 311))
+colnames(new_df) <- c("date")
+
+new_df$date <- folha_df2$date
+new_df <- left_join(new_df, folha_df2, by = c("date"))
+new_df <- left_join(new_df, osp_df2, by = c("date"))
+
+new_df <- new_df %>%
+  mutate(mean = (mean.x+mean.y)/2, sum = (sum.x+sum.y)/2, max = (max.x+max.y)/2, min = (min.x+min.y)/2) %>%
+  select(date, mean, sum, max, min)
+
+new_df[c(7,77,81,127,128,130,139,141,143,154,229,308,311),] <- 
+  folha_df2[c(7,77,81,127,128,130,139,141,143,154,229,308,311),]
+
+SP_covid <- SP_covid[, -c(2:4,13,16:19)]
+
+#SP_covid <- SP_covid %>%
+ # mutate(newCases = log(1+newCases),
+  #       totalCases = log(totalCases),
+   #      newDeaths = log(1+newDeaths),
+    #     totalDeaths = log(totalDeaths),
+     #    tests = log(tests),
+      #   case_fatality_rate = log(1+case_fatality_rate),
+       #  prevalence = log(prevalence)) ###same classic transformation
+
+#SP_covid <- SP_covid %>%
+#  mutate(newCases = log(newCases),
+#         totalCases = log(totalCases),
+#         newDeaths = log(newDeaths),
+#         totalDeaths = log(totalDeaths),
+#         tests = log(tests),
+#         case_fatality_rate = log(case_fatality_rate),
+#         prevalence = log(prevalence)) %>%
+#  mutate_at(c("newCases", "totalCases", "newDeaths", "totalDeaths", "tests", "case_fatality_rate", "prevalence") ,function(x) ifelse(is.infinite(x), 0, x)) ###replace -Inf by 0
+
+#SP_covid <- SP_covid %>%
+#  mutate(newCases = log(newCases),
+#         totalCases = log(totalCases),
+#         newDeaths = log(newDeaths),
+#         totalDeaths = log(totalDeaths),
+#         tests = log(tests),
+#         case_fatality_rate = log(case_fatality_rate),
+#         prevalence = log(prevalence)) %>%
+#  mutate_at(c("newCases", "totalCases", "newDeaths", "totalDeaths", "tests", "case_fatality_rate", "prevalence") ,function(x) ifelse(is.infinite(x), NA, x)) ###replace -Inf by NA
+
+```
+
+```{r}
+# demean
+osp_df3 <- osp_df2 %>%
+  summarise(demean_mean = mean - mean(mean),
+            demean_sum = sum - mean(sum),
+            demean_max = max - mean(max),
+            demean_min = min - mean(min))
+osp_df3$date <- osp_df2$date
+osp_df3 <- select(osp_df3, date, everything())
+
+folha_df3 <- folha_df2 %>%
+  summarise(demean_mean = mean - mean(mean),
+            demean_sum = sum - mean(sum),
+            demean_max = max - mean(max),
+            demean_min = min - mean(min))  
+folha_df3$date <- folha_df2$date
+folha_df3 <- select(folha_df3, date, everything())
+
+new_df1 <- data.frame(matrix(ncol = 1, nrow = 311))
+colnames(new_df1) <- c("date")
+
+new_df1$date <- folha_df3$date
+new_df1 <- left_join(new_df1, folha_df3, by = c("date"))
+new_df1 <- left_join(new_df1, osp_df3, by = c("date"))
+
+new_df1 <- new_df1 %>%
+  mutate(demean_mean = (demean_mean.x+demean_mean.y)/2, 
+         demean_sum = (demean_sum.x+demean_sum.y)/2, 
+         demean_max = (demean_max.x+demean_max.y)/2, 
+         demean_min = (demean_min.x+demean_min.y)/2) %>%
+  select(date, demean_mean, demean_sum, demean_max, demean_min)
+
+new_df1[c(7,77,81,127,128,130,139,141,143,154,229,308,311),] <-
+  folha_df3[c(7,77,81,127,128,130,139,141,143,154,229,308,311),]
+
+new_df2 <- left_join(new_df, new_df1, by = "date")
+```
+
+```{r}
+write_csv(new_df2, "/Users/jiaxuan/Dropbox/sp_results/processed_data/data0621_sent.csv")
+```
+
+
+```{r}
+# pct
+#new_df2 <- new_df %>%
+ # mutate(pct_mean = (mean - lag(mean, 1))/lag(mean, 1),
+  #       pct_sum = (sum - lag(sum, 1))/lag(sum, 1),
+   #      pct_max = (max - lag(max, 1))/lag(max, 1),
+    #     pct_min = (min - lag(min, 1))/lag(min, 1))
+#new_df2 <- new_df2[, -c(6:10)]
+# demean
+#dm_mean <- mean(new_df2$mean)
+#dm_sum <- mean(new_df2$sum)
+#dm_max <- mean(new_df2$max)
+#dm_min <- mean(new_df2$min)
+
+#new_df2 <- new_df2 %>%
+ # mutate(demean_mean = mean - dm_mean,
+  #       demean_sum = sum - dm_sum,
+   #      demean_max = max - dm_max,
+    #     demean_min = min - dm_min)
+
+new_df3 <- left_join(new_df2, SP_covid, by = "date")
+```
+
+```{r}
+## define useful functions
+## create a function to aggregate by 3 days
+rep3 <- function(d){
+ d$period3 =  rep(1:ceiling(nrow(d)/3), each = 3)[1:nrow(d)]
+ d
+}
+
+## weekofmonth function
+wom1 <- function(vector){
+  i = 1
+  wkofmo <- vector()
+  for (i in (1:length(vector))) {
+    if(mday(vector[i])<=7){wkofmo[i] <- 1}
+    if(mday(vector[i])>7 & mday(vector[i])<=14){wkofmo[i] <- 2}
+    if(mday(vector[i])>14 & mday(vector[i])<=21){wkofmo[i] <- 3}
+    if(mday(vector[i])>21 & mday(vector[i])<=28){wkofmo[i] <- 4}
+    if(mday(vector[i])>28 & mday(vector[i])<=31){wkofmo[i] <- 5}
+    i = i+1
+  }
+  wkofmo
+}
+```
+
+```{r}
+new_df3$month <- month(new_df3$date)
+new_df3$dayofwk <- wday(new_df3$date) ##day of week
+#new_df3$wkofmo <- stri_datetime_fields(new_df3$date)$WeekOfMonth
+new_df3$wkofmo <- wom1(new_df3$date)
+
+new_df3 <- select(new_df3, date, month, dayofwk, wkofmo, everything())
+```
+
+```{r}
+new_df4 <- rep3(new_df3)
+
+new_df4 <- new_df4 %>% 
+  select(date, period3, everything()) %>%
+  group_by(period3) %>%
+  summarize(date = date[2],
+            month = month[2],
+            dayofwk = dayofwk[2],
+            wkofmo = wkofmo[2],
+            mean = mean(mean),
+            sum = mean(sum),
+            max = mean(max),
+            min = mean(min),
+            demean_mean = mean(demean_mean),
+            demean_sum = mean(demean_sum),
+            demean_max = mean(demean_max),
+            demean_min = mean(demean_min),
+            newCases = mean(newCases),
+            totalCases = mean(totalCases),
+            newDeaths = mean(newDeaths),
+            totalDeaths = mean(totalDeaths),
+            tests = mean(tests), 
+            case_fatality_rate = mean(case_fatality_rate),
+            prevalence = mean(prevalence))  
+```
+
+
+quarter fixed
+```{r}
+new_df3$quarter <- quarter(new_df3$date)
+```
+
+```{r}
+new_df4$quarter <- quarter(new_df4$date)
+```
+
+## *emergency decisions and policy response in 2020*
+3.13 Start of lockdown
+3.24 Decree of quarantine and social distancing guidelines [socialdis = 1]
+4.20 MOH started to ease social isolation guidelines (lockdown between 3.13 and 4.20) [lockdown = 1]
+6.20 Trial of Oxford COVID-19 vaccine and Sinovac vaccine started [vactrial = 1]
+12.12 Brazilian government unveiled its national vaccination plan against Covid-19 [vacplan = 1]
+
+**Reference: **
+https://noticias.uol.com.br/saude/ultimas-noticias/redacao/2020/04/07/sp-tera-hospital-de-campanha-contra-covid-19-no-complexo-do-ibirapuera.htm  
+https://www.nytimes.com/article/brazil-coronavirus-cases.html  
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7214305/  
+https://clinicaltrials.gov/ct2/show/NCT04456595  
+https://covid19vaccinetrial.co.uk/brazil-trial-launch  
+https://www.straitstimes.com/world/brazil-to-roll-out-covid-19-vaccination-in-first-half-of-2021  
+https://en.wikipedia.org/wiki/COVID-19_pandemic_in_Brazil#cite_note-40  
+https://www.scielo.br/j/eins/a/VFchpPrYBTJBmDgrbPpFFtk/?lang=en#  
+
+
+dd in dummy variables
+```{r}
+new_df3$lockdown <- 0
+new_df3$socialdis <- 0
+new_df3$vactrial <- 0
+new_df3$vacplan <- 0
+new_df3 <- new_df3 %>%
+  select(date, lockdown, socialdis, vactrial, vacplan, everything())
+```
+
+```{r}
+new_df3$lockdown[18:56] <- 1
+new_df3$socialdis[29:311] <- 1
+new_df3$vactrial[117:311] <- 1
+new_df3$vacplan[292:311] <-1
+```
+
+```{r}
+new_df4$lockdown <- 0
+new_df4$socialdis <- 0
+new_df4$vactrial <- 0
+new_df4$vacplan <- 0
+new_df4 <- new_df4 %>%
+  select(date, lockdown, socialdis, vactrial, vacplan, everything())
+```
+
+```{r}
+new_df4$lockdown[7:19] <- 1
+new_df4$socialdis[10:104] <- 1
+new_df4$vactrial[40:104] <- 1
+new_df4$vacplan[98:104] <-1
+```
+
+```{r}
+write_csv(new_df3, "/Users/jiaxuan/Dropbox/sp_results/processed_data/data0621_df3_y.csv")
+write_csv(new_df4, "/Users/jiaxuan/Dropbox/sp_results/processed_data/data0621_df4_y.csv")
+```
+
+
+
+
+
+========
+# rescale raw data
+## dfs containing mean, sum, max, min
+```{r, message=F, error=F}
+SP_covid <- read_csv("SP_covid.csv")
+osp_text <- read_csv("sample/osp_v1_lem_rmstopwords.csv")
+folha_text <- read_csv("sample/folha_v1_lem_rmstopwords.csv")
+osp_tokenized <- read_csv("sample/osp_v1tokenized_lem_rmstopwords.csv")
+folha_tokenized <- read_csv("sample/folha_v1tokenized_lem_rmstopwords.csv")
+osp_tokenized_polarity <- read_csv("sample/osp_v1tokenized_lem_rmstopwords_textblob_polarity.csv")
+folha_tokenized_polarity <- read_csv("sample/folha_v1tokenized_lem_rmstopwords_textblob_polarity.csv")
+```
+
+```{r}
+SP_covid$date <- ymd(SP_covid$date)
+SP_covid <- arrange(SP_covid, date)
+```
+
+```{r}
+folha_date <- dmy(folha_text$folha_de_sp_date)
+folha_text$date <- folha_date
+osp_date <- dmy(osp_text$o_estado_de_sp_date)
+osp_text$date <- osp_date
+```
+
+------osp-------
+```{r}
+testdf<- as.data.frame((!is.na(osp_tokenized))*1)
+testdf2 <- as.data.frame((!is.na(osp_tokenized))*-1)
+
+testdf$ID <- seq.int(nrow(testdf))
+testdf2$ID <- seq.int(nrow(testdf2))
+osp_tokenized_polarity$ID <- seq.int(nrow(osp_tokenized_polarity))
+
+test2 <- rbindlist(list(testdf, osp_tokenized_polarity), use.names=TRUE)
+test3 <- test2[, lapply(.SD, sum), by = ID]
+
+test3[test3 == 0] <- NA
+
+test4 <- rbindlist(list(testdf2, test3), use.names=TRUE)
+test5 <- test4[, lapply(.SD, sum), by = ID]
+
+test5 <- test5[, -"ID"]
+
+```
+
+```{r}
+range01 <- function(x,na.rm=T){(x - min(x,na.rm=T)) / (max(x,na.rm=T) - min(x,na.rm=T))}
+range01 <- function(x,na.rm=T){((x + 1) / 2)}
+```
+
+rescale
+``{r, warning=F}
+i = 1
+while (i < 484) {
+  test5[,i] <- rescale(pull(test5, var = i), to = c(0,1))
+  i = i+1
+}
+``
+```{r}
+x <- c(-0.4, 0.9, -0.7)
+range01(x)
+range01(-0.4)
+```
+
+
+```{r, warning=F}
+i = 1
+while (i < 1645) {
+  test5[i,] <- range01(test5[i,])
+  i = i+1
+}
+```
+
+```{r}
+is.nan.data.frame <- function(x){
+  do.call(cbind, lapply(x, is.nan))
+}
+
+```
+
+
+```{r}
+osp_tokenized_polarity <- test5
+osp_tokenized_polarity[is.nan.data.frame(osp_tokenized_polarity)] <- 0
+write_csv(osp_tokenized_polarity, "/Users/jiaxuan/Dropbox/sp_results/processed_data/osp_rescaled.csv")
+#write_csv(osp_tokenized_polarity, "/Users/jiaxuan/Dropbox/sp_results/processed_data/osp2_rescaled.csv")
+```
+
+
+------folha-------
+```{r}
+testdf<- as.data.frame((!is.na(folha_tokenized))*1)
+testdf2 <- as.data.frame((!is.na(folha_tokenized))*-1)
+
+testdf$ID <- seq.int(nrow(testdf))
+testdf2$ID <- seq.int(nrow(testdf2))
+folha_tokenized_polarity$ID <- seq.int(nrow(folha_tokenized_polarity))
+
+test2 <- rbindlist(list(testdf, folha_tokenized_polarity), use.names=TRUE)
+test3 <- test2[, lapply(.SD, sum), by = ID]
+
+test3[test3 == 0] <- NA
+
+test4 <- rbindlist(list(testdf2, test3), use.names=TRUE)
+test5 <- test4[, lapply(.SD, sum), by = ID]
+
+test5 <- test5[, -"ID"]
+
+```
+
+```{r, warning=F}
+i = 1
+while (i < 6983) {
+  test5[i,] <- range01(test5[i,])
+  i = i+1
+}
+```
+
+```{r}
+folha_tokenized_polarity <- test5
+folha_tokenized_polarity[is.nan.data.frame(folha_tokenized_polarity)] <- 0
+write_csv(folha_tokenized_polarity, "/Users/jiaxuan/Dropbox/sp_results/processed_data/folha_rescaled.csv")
+#write_csv(folha_tokenized_polarity, "/Users/jiaxuan/Dropbox/sp_results/processed_data/folha2_rescaled.csv")
+```
+
+
+================
+
+```{r, message=F, error=F}
+SP_covid <- read_csv("SP_covid.csv")
+osp_text <- read_csv("sample/osp_v1_lem_rmstopwords.csv")
+folha_text <- read_csv("sample/folha_v1_lem_rmstopwords.csv")
+osp_tokenized <- read_csv("sample/osp_v1tokenized_lem_rmstopwords.csv")
+folha_tokenized <- read_csv("sample/folha_v1tokenized_lem_rmstopwords.csv")
+osp_tokenized_polarity <- read_csv("/Users/jiaxuan/Dropbox/sp_results/processed_data/osp_rescaled.csv")
+folha_tokenized_polarity <- read_csv("/Users/jiaxuan/Dropbox/sp_results/processed_data/folha_rescaled.csv")
+```
+
+```{r}
+SP_covid$date <- ymd(SP_covid$date)
+SP_covid <- arrange(SP_covid, date)
+```
+
+```{r}
+folha_date <- dmy(folha_text$folha_de_sp_date)
+folha_text$date <- folha_date
+osp_date <- dmy(osp_text$o_estado_de_sp_date)
+osp_text$date <- osp_date
+```
+
+```{r}
+osp_tokenized$date <- osp_text$date
+osp_tokenized_polarity$date <- osp_text$date
+
+osp_tokenized <- osp_tokenized %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+```
+
+```{r}
+folha_tokenized$date <- folha_text$date
+folha_tokenized_polarity$date <- folha_text$date
+
+folha_tokenized <- folha_tokenized %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  select(date, everything())%>%
+  arrange(date) %>%
+  group_by(date)
+```
+
+filter by date
+```{r}
+SP_covid<- SP_covid[c(1:311),]
+```
+
+```{r}
+osp_tokenized <- osp_tokenized %>%
+  filter(date %in% SP_covid$date)
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  filter(date %in% SP_covid$date)
+
+folha_tokenized <- folha_tokenized %>%
+  filter(date %in% SP_covid$date)
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  filter(date %in% SP_covid$date)
+```
+
+## mean, sum, max, min
+``{r}
+nonNA_osp <- rowSums(!is.na(osp_tokenized))
+osp_tokenized_polarity$nonNA_value <- nonNA_osp
+
+nonNA_folha <- rowSums(!is.na(folha_tokenized))
+folha_tokenized_polarity$nonNA_value <- nonNA_folha
+``
+
+#### osp
+```{r, warning=F}
+sum = rowSums(osp_tokenized_polarity[,c(2:484)], na.rm = TRUE)
+mean = rowMeans(osp_tokenized_polarity[,c(2:484)], na.rm = TRUE)
+max = rowMaxs(as.matrix(osp_tokenized_polarity[,c(2:484)]), na.rm = TRUE)
+min = rowMins(as.matrix(osp_tokenized_polarity[,c(2:484)]), na.rm = TRUE)
+
+osp_tokenized_polarity$osp_sum <- sum
+osp_tokenized_polarity$osp_mean <- mean
+osp_tokenized_polarity$osp_max <- max
+osp_tokenized_polarity$osp_min <- min
+
+osp_tokenized_polarity <- osp_tokenized_polarity %>%
+  select(date, osp_sum, osp_mean, osp_max, osp_min, everything())
+
+osp_df <- osp_tokenized_polarity %>%
+  select(date, osp_sum, osp_mean, osp_max, osp_min)
+```
+
+#### folha
+```{r}
+sum = rowSums(folha_tokenized_polarity[,c(2:396)], na.rm = TRUE)
+mean = rowMeans(folha_tokenized_polarity[,c(2:396)], na.rm = TRUE)
+max = rowMaxs(as.matrix(folha_tokenized_polarity[,c(2:396)]), na.rm = TRUE)
+min = rowMins(as.matrix(folha_tokenized_polarity[,c(2:396)]), na.rm = TRUE)
+
+folha_tokenized_polarity$folha_sum <- sum
+folha_tokenized_polarity$folha_mean <- mean
+folha_tokenized_polarity$folha_max <- max
+folha_tokenized_polarity$folha_min <- min
+
+folha_tokenized_polarity <- folha_tokenized_polarity %>%
+  select(date, folha_sum, folha_mean, folha_max, folha_min, everything())
+
+folha_df <- folha_tokenized_polarity %>%
+  select(date, folha_sum, folha_mean, folha_max, folha_min)
+```
+
+```{r}
+write_csv(osp_df, "/Users/jiaxuan/Dropbox/sp_results/processed_data/osp_rescaled_data.csv")
+write_csv(folha_df, "/Users/jiaxuan/Dropbox/sp_results/processed_data/folha_rescaled_data.csv")
+```
+
+
+
+
+
+
+
+
+
+==============================
+# rescaled 1
+```{r, message=F, error=F}
+SP_covid <- read_csv("SP_covid.csv")
+SP_covid$date <- ymd(SP_covid$date)
+SP_covid <- arrange(SP_covid, date)
+SP_covid<- SP_covid[c(1:311),]
+SP_covid <- SP_covid %>% rename(case_fatality_rate = case_fatility_rate)
+#sp_df1 <- read_csv("processed_data/osp_data.csv")
+#folha_df1 <- read_csv("processed_data/folha_data.csv")
+osp_df1 <- read_csv("processed_data/osp2_rescaled_data.csv")
+folha_df1 <- read_csv("processed_data/folha2_rescaled_data.csv")
+```
+
+aggregate sentiment score data by date, combine osp and folha as one new df
+```{r}
+osp_df2 <- osp_df1 %>%
+  group_by(date) %>%
+  summarise(mean = mean(osp_mean), sum = mean(osp_sum), max = max(osp_max), min = min(osp_min))
+
+#osp_df2$mean <- rescale(osp_df2$mean, to = c(0,1))
+#osp_df2$sum <- rescale(osp_df2$sum, to = c(0,1))
+#osp_df2$max <- rescale(osp_df2$max, to = c(0,1))
+#osp_df2$min <- rescale(osp_df2$min, to = c(0,1))
+
+folha_df2 <- folha_df1 %>%
+  group_by(date) %>%
+  summarise(mean = mean(folha_mean), sum = mean(folha_sum), max = max(folha_max), min = min(folha_min))
+
+#folha_df2$mean <- rescale(folha_df2$mean, to = c(0,1))
+#folha_df2$sum <- rescale(folha_df2$sum, to = c(0,1))
+#folha_df2$max <- rescale(folha_df2$max, to = c(0,1))
+#folha_df2$min <- rescale(folha_df2$min, to = c(0,1))
+
+new_df <- data.frame(matrix(ncol = 1, nrow = 311))
+colnames(new_df) <- c("date")
+
+new_df$date <- folha_df2$date
+new_df <- left_join(new_df, folha_df2, by = c("date"))
+new_df <- left_join(new_df, osp_df2, by = c("date"))
+
+new_df <- new_df %>%
+  mutate(mean = (mean.x+mean.y)/2, sum = (sum.x+sum.y)/2, max = (max.x+max.y)/2, min = (min.x+min.y)/2) %>%
+  select(date, mean, sum, max, min)
+
+new_df[c(7,77,81,127,128,130,139,141,143,154,229,308,311),] <- 
+  folha_df2[c(7,77,81,127,128,130,139,141,143,154,229,308,311),]
+
+SP_covid <- SP_covid[, -c(2:4,13,16:19)]
+
+SP_covid <- SP_covid %>%
+  mutate(newCases = log(1+newCases),
+         totalCases = log(totalCases),
+         newDeaths = log(1+newDeaths),
+         totalDeaths = log(totalDeaths),
+         tests = log(tests),
+         case_fatality_rate = log(1+case_fatality_rate),
+         prevalence = log(prevalence)) ###same classic transformation
+
+#SP_covid <- SP_covid %>%
+#  mutate(newCases = log(newCases),
+#         totalCases = log(totalCases),
+#         newDeaths = log(newDeaths),
+#         totalDeaths = log(totalDeaths),
+#         tests = log(tests),
+#         case_fatality_rate = log(case_fatality_rate),
+#         prevalence = log(prevalence)) %>%
+#  mutate_at(c("newCases", "totalCases", "newDeaths", "totalDeaths", "tests", "case_fatality_rate", "prevalence") ,function(x) ifelse(is.infinite(x), 0, x)) ###replace -Inf by 0
+
+#SP_covid <- SP_covid %>%
+#  mutate(newCases = log(newCases),
+#         totalCases = log(totalCases),
+#         newDeaths = log(newDeaths),
+#         totalDeaths = log(totalDeaths),
+#         tests = log(tests),
+#         case_fatality_rate = log(case_fatality_rate),
+#         prevalence = log(prevalence)) %>%
+#  mutate_at(c("newCases", "totalCases", "newDeaths", "totalDeaths", "tests", "case_fatality_rate", "prevalence") ,function(x) ifelse(is.infinite(x), NA, x)) ###replace -Inf by NA
+
+```
+
+
+```{r}
+# demean
+osp_df3 <- osp_df2 %>%
+  summarise(demean_mean = mean - mean(mean),
+            demean_sum = sum - mean(sum),
+            demean_max = max - mean(max),
+            demean_min = min - mean(min))
+osp_df3$date <- osp_df2$date
+osp_df3 <- select(osp_df3, date, everything())
+
+folha_df3 <- folha_df2 %>%
+  summarise(demean_mean = mean - mean(mean),
+            demean_sum = sum - mean(sum),
+            demean_max = max - mean(max),
+            demean_min = min - mean(min))  
+folha_df3$date <- folha_df2$date
+folha_df3 <- select(folha_df3, date, everything())
+
+new_df1 <- data.frame(matrix(ncol = 1, nrow = 311))
+colnames(new_df1) <- c("date")
+
+new_df1$date <- folha_df3$date
+new_df1 <- left_join(new_df1, folha_df3, by = c("date"))
+new_df1 <- left_join(new_df1, osp_df3, by = c("date"))
+
+new_df1 <- new_df1 %>%
+  mutate(demean_mean = (demean_mean.x+demean_mean.y)/2, 
+         demean_sum = (demean_sum.x+demean_sum.y)/2, 
+         demean_max = (demean_max.x+demean_max.y)/2, 
+         demean_min = (demean_min.x+demean_min.y)/2) %>%
+  select(date, demean_mean, demean_sum, demean_max, demean_min)
+
+new_df1[c(7,77,81,127,128,130,139,141,143,154,229,308,311),] <-
+  folha_df3[c(7,77,81,127,128,130,139,141,143,154,229,308,311),]
+
+new_df2 <- left_join(new_df, new_df1, by = "date")
+```
+
+``{r}
+new_df2$mean <- rescale(new_df2$mean, to = c(0, 1))
+new_df2$sum <- rescale(new_df2$sum, to = c(0, 1))
+new_df2$max <- rescale(new_df2$max, to = c(0, 1))
+new_df2$min <- rescale(new_df2$min, to = c(0, 1))
+new_df2$demean_mean <- rescale(new_df2$demean_mean, to = c(0, 1))
+new_df2$demean_sum <- rescale(new_df2$demean_sum, to = c(0, 1))
+new_df2$demean_max <- rescale(new_df2$demean_max, to = c(0, 1))
+new_df2$demean_min <- rescale(new_df2$demean_min, to = c(0, 1))
+``
+
+```{r}
+write_csv(new_df2, "/Users/jiaxuan/Dropbox/sp_results/processed_data/rescaled2_sent.csv")
+```
+
+
+```{r}
+# pct
+#new_df2 <- new_df %>%
+ # mutate(pct_mean = (mean - lag(mean, 1))/lag(mean, 1),
+  #       pct_sum = (sum - lag(sum, 1))/lag(sum, 1),
+   #      pct_max = (max - lag(max, 1))/lag(max, 1),
+    #     pct_min = (min - lag(min, 1))/lag(min, 1))
+#new_df2 <- new_df2[, -c(6:10)]
+# demean
+#dm_mean <- mean(new_df2$mean)
+#dm_sum <- mean(new_df2$sum)
+#dm_max <- mean(new_df2$max)
+#dm_min <- mean(new_df2$min)
+
+#new_df2 <- new_df2 %>%
+ # mutate(demean_mean = mean - dm_mean,
+  #       demean_sum = sum - dm_sum,
+   #      demean_max = max - dm_max,
+    #     demean_min = min - dm_min)
+
+new_df3 <- left_join(new_df2, SP_covid, by = "date")
+```
+
+```{r}
+## define useful functions
+## create a function to aggregate by 3 days
+rep3 <- function(d){
+ d$period3 =  rep(1:ceiling(nrow(d)/3), each = 3)[1:nrow(d)]
+ d
+}
+
+## weekofmonth function
+wom1 <- function(vector){
+  i = 1
+  wkofmo <- vector()
+  for (i in (1:length(vector))) {
+    if(mday(vector[i])<=7){wkofmo[i] <- 1}
+    if(mday(vector[i])>7 & mday(vector[i])<=14){wkofmo[i] <- 2}
+    if(mday(vector[i])>14 & mday(vector[i])<=21){wkofmo[i] <- 3}
+    if(mday(vector[i])>21 & mday(vector[i])<=28){wkofmo[i] <- 4}
+    if(mday(vector[i])>28 & mday(vector[i])<=31){wkofmo[i] <- 5}
+    i = i+1
+  }
+  wkofmo
+}
+```
+
+```{r}
+new_df3$month <- month(new_df3$date)
+new_df3$dayofwk <- wday(new_df3$date) ##day of week
+#new_df3$wkofmo <- stri_datetime_fields(new_df3$date)$WeekOfMonth
+new_df3$wkofmo <- wom1(new_df3$date)
+
+new_df3 <- select(new_df3, date, month, dayofwk, wkofmo, everything())
+```
+
+```{r}
+new_df4 <- rep3(new_df3)
+
+new_df4 <- new_df4 %>% 
+  select(date, period3, everything()) %>%
+  group_by(period3) %>%
+  summarize(date = date[2],
+            month = month[2],
+            dayofwk = dayofwk[2],
+            wkofmo = wkofmo[2],
+            mean = mean(mean),
+            sum = mean(sum),
+            max = mean(max),
+            min = mean(min),
+            demean_mean = mean(demean_mean),
+            demean_sum = mean(demean_sum),
+            demean_max = mean(demean_max),
+            demean_min = mean(demean_min),
+            newCases = mean(newCases),
+            totalCases = mean(totalCases),
+            newDeaths = mean(newDeaths),
+            totalDeaths = mean(totalDeaths),
+            tests = mean(tests), 
+            case_fatality_rate = mean(case_fatality_rate),
+            prevalence = mean(prevalence))  
+```
+
+
+quarter fixed
+```{r}
+new_df3$quarter <- quarter(new_df3$date)
+```
+
+```{r}
+new_df4$quarter <- quarter(new_df4$date)
+```
+
+## *emergency decisions and policy response in 2020*
+3.13 Start of lockdown
+3.24 Decree of quarantine and social distancing guidelines [socialdis = 1]
+4.20 MOH started to ease social isolation guidelines (lockdown between 3.13 and 4.20) [lockdown = 1]
+6.20 Trial of Oxford COVID-19 vaccine and Sinovac vaccine started [vactrial = 1]
+12.12 Brazilian government unveiled its national vaccination plan against Covid-19 [vacplan = 1]
+
+**Reference: **
+https://noticias.uol.com.br/saude/ultimas-noticias/redacao/2020/04/07/sp-tera-hospital-de-campanha-contra-covid-19-no-complexo-do-ibirapuera.htm  
+https://www.nytimes.com/article/brazil-coronavirus-cases.html  
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7214305/  
+https://clinicaltrials.gov/ct2/show/NCT04456595  
+https://covid19vaccinetrial.co.uk/brazil-trial-launch  
+https://www.straitstimes.com/world/brazil-to-roll-out-covid-19-vaccination-in-first-half-of-2021  
+https://en.wikipedia.org/wiki/COVID-19_pandemic_in_Brazil#cite_note-40  
+https://www.scielo.br/j/eins/a/VFchpPrYBTJBmDgrbPpFFtk/?lang=en#  
+
+
+dd in dummy variables
+```{r}
+new_df3$lockdown <- 0
+new_df3$socialdis <- 0
+new_df3$vactrial <- 0
+new_df3$vacplan <- 0
+new_df3 <- new_df3 %>%
+  select(date, lockdown, socialdis, vactrial, vacplan, everything())
+```
+
+```{r}
+new_df3$lockdown[18:56] <- 1
+new_df3$socialdis[29:311] <- 1
+new_df3$vactrial[117:311] <- 1
+new_df3$vacplan[292:311] <-1
+```
+
+```{r}
+new_df4$lockdown <- 0
+new_df4$socialdis <- 0
+new_df4$vactrial <- 0
+new_df4$vacplan <- 0
+new_df4 <- new_df4 %>%
+  select(date, lockdown, socialdis, vactrial, vacplan, everything())
+```
+
+```{r}
+new_df4$lockdown[7:19] <- 1
+new_df4$socialdis[10:104] <- 1
+new_df4$vactrial[40:104] <- 1
+new_df4$vacplan[98:104] <-1
+```
+
+```{r}
+write_csv(new_df3, "/Users/jiaxuan/Dropbox/sp_results/processed_data/rescaled2_df3_y.csv")
+write_csv(new_df4, "/Users/jiaxuan/Dropbox/sp_results/processed_data/rescaled2_df4_y.csv")
+```
+
+
+
+## transform log(1+y)
+```{r, warning = F}
+new_df5 <- new_df3 %>%
+  mutate(mean = log(1+mean),
+         sum = log(1+sum),
+         max = log(1+max),
+         min = log(1+min),
+         demean_mean = log(1+demean_mean),
+         demean_sum = log(1+demean_sum),
+         demean_max = log(1+demean_max),
+         demean_min = log(1+demean_min)
+         ) %>%
+  mutate_at(c("sum", "demean_sum") ,function(x) ifelse(is.nan(x), NA, x))
+```
+
+
+```{r, warning=F}
+new_df6 <- new_df4 %>%
+  mutate(mean = log(1+mean),
+         sum = log(1+sum),
+         max = log(1+max),
+         min = log(1+min),
+         demean_mean = log(1+demean_mean),
+         demean_sum = log(1+demean_sum),
+         demean_max = log(1+demean_max),
+         demean_min = log(1+demean_min)
+         ) %>%
+  mutate_at(c("demean_sum") ,function(x) ifelse(is.nan(x), NA, x))
+```
+
+```{r}
+write_csv(new_df5, "/Users/jiaxuan/Dropbox/sp_results/processed_data/rescaled2_df3_log.csv")
+write_csv(new_df6, "/Users/jiaxuan/Dropbox/sp_results/processed_data/rescaled2_df4_log.csv")
+```
+
+
+
+
+
+
+
+
+

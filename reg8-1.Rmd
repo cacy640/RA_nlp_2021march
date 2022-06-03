@@ -1,0 +1,2974 @@
+---
+title: "reg8_1"
+author: "Jiaxuan"
+date: "6/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+setwd("~/Dropbox/sp_results")
+```
+
+```{r, message=F}
+library(tidyverse)
+library(stargazer)
+library(lubridate)
+```
+
+AVG
+# NOTE
+*regression model*
+y~log(1+x)  
+y=sentiment, x=log(1+covid_variable)  
+
+*list of fixed effects*
+x. base (w/o control)
+0. month only
+1. dayofwk & wkofmonth only
+2. d&w + quarter
+3. d&w + quarter + lockdown
+4. lockdown only
+5. d&w + lockdown
+
+
+
+# data processing
+```{r, message=F, error=F}
+#new_df3 <- read_csv("processed_data/combined_df3_y.csv")
+#new_df4 <- read_csv("processed_data/combined_df4_y.csv")
+
+new_df3 <- read_csv("processed_data/rescaled2_df3_y.csv")
+#new_df3 <- new_df3[-c(1:36),]
+#new_df3 <- new_df3[-c(1:66),]
+new_df4 <- read_csv("processed_data/rescaled2_df4_y.csv")
+#new_df4 <- new_df4[-c(1:12),]
+#new_df4 <- new_df4[-c(1:22),]
+```
+
+# base: w/o control
+## x-1 daily
+### x-1-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1), data = new_df3)
+fit2 <- lm(mean~lag(newCases,2), data = new_df3)
+fit3 <- lm(mean~lag(newCases,3), data = new_df3)
+fit4 <- lm(mean~lag(newCases,4), data = new_df3)
+fit5 <- lm(mean~lag(newCases,5), data = new_df3)
+fit6 <- lm(mean~lag(newCases,6), data = new_df3)
+fit7 <- lm(mean~lag(newCases,7), data = new_df3)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+         
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "tablex-1-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### x-1-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1), data = new_df3)
+fit2 <- lm(demean_mean~lag(newCases,2), data = new_df3)
+fit3 <- lm(demean_mean~lag(newCases,3), data = new_df3)
+fit4 <- lm(demean_mean~lag(newCases,4), data = new_df3)
+fit5 <- lm(demean_mean~lag(newCases,5), data = new_df3)
+fit6 <- lm(demean_mean~lag(newCases,6), data = new_df3)
+fit7 <- lm(demean_mean~lag(newCases,7), data = new_df3)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+         
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "tablex-1-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### x-1-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1), data = new_df3)
+fit2 <- lm(mean~lag(newDeaths,2), data = new_df3)
+fit3 <- lm(mean~lag(newDeaths,3), data = new_df3)
+fit4 <- lm(mean~lag(newDeaths,4), data = new_df3)
+fit5 <- lm(mean~lag(newDeaths,5), data = new_df3)
+fit6 <- lm(mean~lag(newDeaths,6), data = new_df3)
+fit7 <- lm(mean~lag(newDeaths,7), data = new_df3)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+         
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "tablex-1-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### x-1-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1), data = new_df3)
+fit2 <- lm(demean_mean~lag(newDeaths,2), data = new_df3)
+fit3 <- lm(demean_mean~lag(newDeaths,3), data = new_df3)
+fit4 <- lm(demean_mean~lag(newDeaths,4), data = new_df3)
+fit5 <- lm(demean_mean~lag(newDeaths,5), data = new_df3)
+fit6 <- lm(demean_mean~lag(newDeaths,6), data = new_df3)
+fit7 <- lm(demean_mean~lag(newDeaths,7), data = new_df3)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+         
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "tablex-1-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### x-1-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1), data = new_df3)
+fit2 <- lm(mean~lag(case_fatality_rate,2), data = new_df3)
+fit3 <- lm(mean~lag(case_fatality_rate,3), data = new_df3)
+fit4 <- lm(mean~lag(case_fatality_rate,4), data = new_df3)
+fit5 <- lm(mean~lag(case_fatality_rate,5), data = new_df3)
+fit6 <- lm(mean~lag(case_fatality_rate,6), data = new_df3)
+fit7 <- lm(mean~lag(case_fatality_rate,7), data = new_df3)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+         
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "tablex-1-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### x-1-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1), data = new_df3)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2), data = new_df3)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3), data = new_df3)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4), data = new_df3)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5), data = new_df3)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6), data = new_df3)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7), data = new_df3)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+         
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "tablex-1-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+## x-2 three-day
+### x-2-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1), data = new_df4)
+fit2 <- lm(mean~lag(newCases,2), data = new_df4)
+fit3 <- lm(mean~lag(newCases,3), data = new_df4)
+fit4 <- lm(mean~lag(newCases,4), data = new_df4)
+fit5 <- lm(mean~lag(newCases,5), data = new_df4)
+fit6 <- lm(mean~lag(newCases,6), data = new_df4)
+fit7 <- lm(mean~lag(newCases,7), data = new_df4)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+         
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "tablex-2-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### x-2-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1), data = new_df4)
+fit2 <- lm(demean_mean~lag(newCases,2), data = new_df4)
+fit3 <- lm(demean_mean~lag(newCases,3), data = new_df4)
+fit4 <- lm(demean_mean~lag(newCases,4), data = new_df4)
+fit5 <- lm(demean_mean~lag(newCases,5), data = new_df4)
+fit6 <- lm(demean_mean~lag(newCases,6), data = new_df4)
+fit7 <- lm(demean_mean~lag(newCases,7), data = new_df4)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+         
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "tablex-2-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### x-2-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1), data = new_df4)
+fit2 <- lm(mean~lag(newDeaths,2), data = new_df4)
+fit3 <- lm(mean~lag(newDeaths,3), data = new_df4)
+fit4 <- lm(mean~lag(newDeaths,4), data = new_df4)
+fit5 <- lm(mean~lag(newDeaths,5), data = new_df4)
+fit6 <- lm(mean~lag(newDeaths,6), data = new_df4)
+fit7 <- lm(mean~lag(newDeaths,7), data = new_df4)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+         
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "tablex-2-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### x-2-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1), data = new_df4)
+fit2 <- lm(demean_mean~lag(newDeaths,2), data = new_df4)
+fit3 <- lm(demean_mean~lag(newDeaths,3), data = new_df4)
+fit4 <- lm(demean_mean~lag(newDeaths,4), data = new_df4)
+fit5 <- lm(demean_mean~lag(newDeaths,5), data = new_df4)
+fit6 <- lm(demean_mean~lag(newDeaths,6), data = new_df4)
+fit7 <- lm(demean_mean~lag(newDeaths,7), data = new_df4)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+         
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "tablex-2-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### x-2-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1), data = new_df4)
+fit2 <- lm(mean~lag(case_fatality_rate,2), data = new_df4)
+fit3 <- lm(mean~lag(case_fatality_rate,3), data = new_df4)
+fit4 <- lm(mean~lag(case_fatality_rate,4), data = new_df4)
+fit5 <- lm(mean~lag(case_fatality_rate,5), data = new_df4)
+fit6 <- lm(mean~lag(case_fatality_rate,6), data = new_df4)
+fit7 <- lm(mean~lag(case_fatality_rate,7), data = new_df4)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+         
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "tablex-2-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### x-2-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1), data = new_df4)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2), data = new_df4)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3), data = new_df4)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4), data = new_df4)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5), data = new_df4)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6), data = new_df4)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7), data = new_df4)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+         
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "tablex-2-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+
+# regression 0 (month only)
+## 0-1 daily
+### 0-1-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1) + month, data = new_df3)
+fit2 <- lm(mean~lag(newCases,2) + month, data = new_df3)
+fit3 <- lm(mean~lag(newCases,3) + month, data = new_df3)
+fit4 <- lm(mean~lag(newCases,4) + month, data = new_df3)
+fit5 <- lm(mean~lag(newCases,5) + month, data = new_df3)
+fit6 <- lm(mean~lag(newCases,6) + month, data = new_df3)
+fit7 <- lm(mean~lag(newCases,7) + month, data = new_df3)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + month
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("month"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table0-1-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 0-1-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1) + month, data = new_df3)
+fit2 <- lm(demean_mean~lag(newCases,2) + month, data = new_df3)
+fit3 <- lm(demean_mean~lag(newCases,3) + month, data = new_df3)
+fit4 <- lm(demean_mean~lag(newCases,4) + month, data = new_df3)
+fit5 <- lm(demean_mean~lag(newCases,5) + month, data = new_df3)
+fit6 <- lm(demean_mean~lag(newCases,6) + month, data = new_df3)
+fit7 <- lm(demean_mean~lag(newCases,7) + month, data = new_df3)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + month
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("month"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table0-1-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 0-1-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1) + month, data = new_df3)
+fit2 <- lm(mean~lag(newDeaths,2) + month, data = new_df3)
+fit3 <- lm(mean~lag(newDeaths,3) + month, data = new_df3)
+fit4 <- lm(mean~lag(newDeaths,4) + month, data = new_df3)
+fit5 <- lm(mean~lag(newDeaths,5) + month, data = new_df3)
+fit6 <- lm(mean~lag(newDeaths,6) + month, data = new_df3)
+fit7 <- lm(mean~lag(newDeaths,7) + month, data = new_df3)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + month
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("month"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table0-1-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 0-1-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1) + month, data = new_df3)
+fit2 <- lm(demean_mean~lag(newDeaths,2) + month, data = new_df3)
+fit3 <- lm(demean_mean~lag(newDeaths,3) + month, data = new_df3)
+fit4 <- lm(demean_mean~lag(newDeaths,4) + month, data = new_df3)
+fit5 <- lm(demean_mean~lag(newDeaths,5) + month, data = new_df3)
+fit6 <- lm(demean_mean~lag(newDeaths,6) + month, data = new_df3)
+fit7 <- lm(demean_mean~lag(newDeaths,7) + month, data = new_df3)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + month
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("month"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table0-1-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 0-1-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1) + month, data = new_df3)
+fit2 <- lm(mean~lag(case_fatality_rate,2) + month, data = new_df3)
+fit3 <- lm(mean~lag(case_fatality_rate,3) + month, data = new_df3)
+fit4 <- lm(mean~lag(case_fatality_rate,4) + month, data = new_df3)
+fit5 <- lm(mean~lag(case_fatality_rate,5) + month, data = new_df3)
+fit6 <- lm(mean~lag(case_fatality_rate,6) + month, data = new_df3)
+fit7 <- lm(mean~lag(case_fatality_rate,7) + month, data = new_df3)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + month
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("month"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table0-1-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 0-1-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1) + month, data = new_df3)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2) + month, data = new_df3)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3) + month, data = new_df3)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4) + month, data = new_df3)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5) + month, data = new_df3)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6) + month, data = new_df3)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7) + month, data = new_df3)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + month
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("month"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table0-1-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+## 0-2 three-day
+### 0-2-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1) + month, data = new_df4)
+fit2 <- lm(mean~lag(newCases,2) + month, data = new_df4)
+fit3 <- lm(mean~lag(newCases,3) + month, data = new_df4)
+fit4 <- lm(mean~lag(newCases,4) + month, data = new_df4)
+fit5 <- lm(mean~lag(newCases,5) + month, data = new_df4)
+fit6 <- lm(mean~lag(newCases,6) + month, data = new_df4)
+fit7 <- lm(mean~lag(newCases,7) + month, data = new_df4)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + month
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("month"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table0-2-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 0-2-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1) + month, data = new_df4)
+fit2 <- lm(demean_mean~lag(newCases,2) + month, data = new_df4)
+fit3 <- lm(demean_mean~lag(newCases,3) + month, data = new_df4)
+fit4 <- lm(demean_mean~lag(newCases,4) + month, data = new_df4)
+fit5 <- lm(demean_mean~lag(newCases,5) + month, data = new_df4)
+fit6 <- lm(demean_mean~lag(newCases,6) + month, data = new_df4)
+fit7 <- lm(demean_mean~lag(newCases,7) + month, data = new_df4)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + month
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("month"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table0-2-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 0-2-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1) + month, data = new_df4)
+fit2 <- lm(mean~lag(newDeaths,2) + month, data = new_df4)
+fit3 <- lm(mean~lag(newDeaths,3) + month, data = new_df4)
+fit4 <- lm(mean~lag(newDeaths,4) + month, data = new_df4)
+fit5 <- lm(mean~lag(newDeaths,5) + month, data = new_df4)
+fit6 <- lm(mean~lag(newDeaths,6) + month, data = new_df4)
+fit7 <- lm(mean~lag(newDeaths,7) + month, data = new_df4)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + month
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("month"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table0-2-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 0-2-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1) + month, data = new_df4)
+fit2 <- lm(demean_mean~lag(newDeaths,2) + month, data = new_df4)
+fit3 <- lm(demean_mean~lag(newDeaths,3) + month, data = new_df4)
+fit4 <- lm(demean_mean~lag(newDeaths,4) + month, data = new_df4)
+fit5 <- lm(demean_mean~lag(newDeaths,5) + month, data = new_df4)
+fit6 <- lm(demean_mean~lag(newDeaths,6) + month, data = new_df4)
+fit7 <- lm(demean_mean~lag(newDeaths,7) + month, data = new_df4)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + month
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("month"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table0-2-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 0-2-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1) + month, data = new_df4)
+fit2 <- lm(mean~lag(case_fatality_rate,2) + month, data = new_df4)
+fit3 <- lm(mean~lag(case_fatality_rate,3) + month, data = new_df4)
+fit4 <- lm(mean~lag(case_fatality_rate,4) + month, data = new_df4)
+fit5 <- lm(mean~lag(case_fatality_rate,5) + month, data = new_df4)
+fit6 <- lm(mean~lag(case_fatality_rate,6) + month, data = new_df4)
+fit7 <- lm(mean~lag(case_fatality_rate,7) + month, data = new_df4)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + month
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("month"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table0-2-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 0-2-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1) + month, data = new_df4)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2) + month, data = new_df4)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3) + month, data = new_df4)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4) + month, data = new_df4)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5) + month, data = new_df4)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6) + month, data = new_df4)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7) + month, data = new_df4)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + month
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("month"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table0-2-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+# regression 1 (dayofwk & wkofmo)
+## 1-1 daily
+### 1-1-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1) + dayofwk + wkofmo, data = new_df3)
+fit2 <- lm(mean~lag(newCases,2) + dayofwk + wkofmo, data = new_df3)
+fit3 <- lm(mean~lag(newCases,3) + dayofwk + wkofmo, data = new_df3)
+fit4 <- lm(mean~lag(newCases,4) + dayofwk + wkofmo, data = new_df3)
+fit5 <- lm(mean~lag(newCases,5) + dayofwk + wkofmo, data = new_df3)
+fit6 <- lm(mean~lag(newCases,6) + dayofwk + wkofmo, data = new_df3)
+fit7 <- lm(mean~lag(newCases,7) + dayofwk + wkofmo, data = new_df3)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table1-1-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 1-1-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1) + dayofwk + wkofmo, data = new_df3)
+fit2 <- lm(demean_mean~lag(newCases,2) + dayofwk + wkofmo, data = new_df3)
+fit3 <- lm(demean_mean~lag(newCases,3) + dayofwk + wkofmo, data = new_df3)
+fit4 <- lm(demean_mean~lag(newCases,4) + dayofwk + wkofmo, data = new_df3)
+fit5 <- lm(demean_mean~lag(newCases,5) + dayofwk + wkofmo, data = new_df3)
+fit6 <- lm(demean_mean~lag(newCases,6) + dayofwk + wkofmo, data = new_df3)
+fit7 <- lm(demean_mean~lag(newCases,7) + dayofwk + wkofmo, data = new_df3)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table1-1-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 1-1-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1) + dayofwk + wkofmo, data = new_df3)
+fit2 <- lm(mean~lag(newDeaths,2) + dayofwk + wkofmo, data = new_df3)
+fit3 <- lm(mean~lag(newDeaths,3) + dayofwk + wkofmo, data = new_df3)
+fit4 <- lm(mean~lag(newDeaths,4) + dayofwk + wkofmo, data = new_df3)
+fit5 <- lm(mean~lag(newDeaths,5) + dayofwk + wkofmo, data = new_df3)
+fit6 <- lm(mean~lag(newDeaths,6) + dayofwk + wkofmo, data = new_df3)
+fit7 <- lm(mean~lag(newDeaths,7) + dayofwk + wkofmo, data = new_df3)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table1-1-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 1-1-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1) + dayofwk + wkofmo, data = new_df3)
+fit2 <- lm(demean_mean~lag(newDeaths,2) + dayofwk + wkofmo, data = new_df3)
+fit3 <- lm(demean_mean~lag(newDeaths,3) + dayofwk + wkofmo, data = new_df3)
+fit4 <- lm(demean_mean~lag(newDeaths,4) + dayofwk + wkofmo, data = new_df3)
+fit5 <- lm(demean_mean~lag(newDeaths,5) + dayofwk + wkofmo, data = new_df3)
+fit6 <- lm(demean_mean~lag(newDeaths,6) + dayofwk + wkofmo, data = new_df3)
+fit7 <- lm(demean_mean~lag(newDeaths,7) + dayofwk + wkofmo, data = new_df3)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table1-1-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 1-1-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1) + dayofwk + wkofmo, data = new_df3)
+fit2 <- lm(mean~lag(case_fatality_rate,2) + dayofwk + wkofmo, data = new_df3)
+fit3 <- lm(mean~lag(case_fatality_rate,3) + dayofwk + wkofmo, data = new_df3)
+fit4 <- lm(mean~lag(case_fatality_rate,4) + dayofwk + wkofmo, data = new_df3)
+fit5 <- lm(mean~lag(case_fatality_rate,5) + dayofwk + wkofmo, data = new_df3)
+fit6 <- lm(mean~lag(case_fatality_rate,6) + dayofwk + wkofmo, data = new_df3)
+fit7 <- lm(mean~lag(case_fatality_rate,7) + dayofwk + wkofmo, data = new_df3)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table1-1-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 1-1-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1) + dayofwk + wkofmo, data = new_df3)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2) + dayofwk + wkofmo, data = new_df3)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3) + dayofwk + wkofmo, data = new_df3)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4) + dayofwk + wkofmo, data = new_df3)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5) + dayofwk + wkofmo, data = new_df3)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6) + dayofwk + wkofmo, data = new_df3)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7) + dayofwk + wkofmo, data = new_df3)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table1-1-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+## 1-2 three-day
+### 1-2-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1) + dayofwk + wkofmo, data = new_df4)
+fit2 <- lm(mean~lag(newCases,2) + dayofwk + wkofmo, data = new_df4)
+fit3 <- lm(mean~lag(newCases,3) + dayofwk + wkofmo, data = new_df4)
+fit4 <- lm(mean~lag(newCases,4) + dayofwk + wkofmo, data = new_df4)
+fit5 <- lm(mean~lag(newCases,5) + dayofwk + wkofmo, data = new_df4)
+fit6 <- lm(mean~lag(newCases,6) + dayofwk + wkofmo, data = new_df4)
+fit7 <- lm(mean~lag(newCases,7) + dayofwk + wkofmo, data = new_df4)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table1-2-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 1-2-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1) + dayofwk + wkofmo, data = new_df4)
+fit2 <- lm(demean_mean~lag(newCases,2) + dayofwk + wkofmo, data = new_df4)
+fit3 <- lm(demean_mean~lag(newCases,3) + dayofwk + wkofmo, data = new_df4)
+fit4 <- lm(demean_mean~lag(newCases,4) + dayofwk + wkofmo, data = new_df4)
+fit5 <- lm(demean_mean~lag(newCases,5) + dayofwk + wkofmo, data = new_df4)
+fit6 <- lm(demean_mean~lag(newCases,6) + dayofwk + wkofmo, data = new_df4)
+fit7 <- lm(demean_mean~lag(newCases,7) + dayofwk + wkofmo, data = new_df4)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table1-2-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 1-2-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1) + dayofwk + wkofmo, data = new_df4)
+fit2 <- lm(mean~lag(newDeaths,2) + dayofwk + wkofmo, data = new_df4)
+fit3 <- lm(mean~lag(newDeaths,3) + dayofwk + wkofmo, data = new_df4)
+fit4 <- lm(mean~lag(newDeaths,4) + dayofwk + wkofmo, data = new_df4)
+fit5 <- lm(mean~lag(newDeaths,5) + dayofwk + wkofmo, data = new_df4)
+fit6 <- lm(mean~lag(newDeaths,6) + dayofwk + wkofmo, data = new_df4)
+fit7 <- lm(mean~lag(newDeaths,7) + dayofwk + wkofmo, data = new_df4)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table1-2-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 1-2-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1) + dayofwk + wkofmo, data = new_df4)
+fit2 <- lm(demean_mean~lag(newDeaths,2) + dayofwk + wkofmo, data = new_df4)
+fit3 <- lm(demean_mean~lag(newDeaths,3) + dayofwk + wkofmo, data = new_df4)
+fit4 <- lm(demean_mean~lag(newDeaths,4) + dayofwk + wkofmo, data = new_df4)
+fit5 <- lm(demean_mean~lag(newDeaths,5) + dayofwk + wkofmo, data = new_df4)
+fit6 <- lm(demean_mean~lag(newDeaths,6) + dayofwk + wkofmo, data = new_df4)
+fit7 <- lm(demean_mean~lag(newDeaths,7) + dayofwk + wkofmo, data = new_df4)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table1-2-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 1-2-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1) + dayofwk + wkofmo, data = new_df4)
+fit2 <- lm(mean~lag(case_fatality_rate,2) + dayofwk + wkofmo, data = new_df4)
+fit3 <- lm(mean~lag(case_fatality_rate,3) + dayofwk + wkofmo, data = new_df4)
+fit4 <- lm(mean~lag(case_fatality_rate,4) + dayofwk + wkofmo, data = new_df4)
+fit5 <- lm(mean~lag(case_fatality_rate,5) + dayofwk + wkofmo, data = new_df4)
+fit6 <- lm(mean~lag(case_fatality_rate,6) + dayofwk + wkofmo, data = new_df4)
+fit7 <- lm(mean~lag(case_fatality_rate,7) + dayofwk + wkofmo, data = new_df4)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table1-2-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 1-2-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1) + dayofwk + wkofmo, data = new_df4)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2) + dayofwk + wkofmo, data = new_df4)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3) + dayofwk + wkofmo, data = new_df4)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4) + dayofwk + wkofmo, data = new_df4)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5) + dayofwk + wkofmo, data = new_df4)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6) + dayofwk + wkofmo, data = new_df4)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7) + dayofwk + wkofmo, data = new_df4)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table1-2-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+
+# regression 2 (d&w+quarter)
+## 2-1 daily
+### 2-1-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1) + dayofwk + wkofmo + quarter, data = new_df3)
+fit2 <- lm(mean~lag(newCases,2) + dayofwk + wkofmo + quarter, data = new_df3)
+fit3 <- lm(mean~lag(newCases,3) + dayofwk + wkofmo + quarter, data = new_df3)
+fit4 <- lm(mean~lag(newCases,4) + dayofwk + wkofmo + quarter, data = new_df3)
+fit5 <- lm(mean~lag(newCases,5) + dayofwk + wkofmo + quarter, data = new_df3)
+fit6 <- lm(mean~lag(newCases,6) + dayofwk + wkofmo + quarter, data = new_df3)
+fit7 <- lm(mean~lag(newCases,7) + dayofwk + wkofmo + quarter, data = new_df3)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo + quarter
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table2-1-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 2-1-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1) + dayofwk + wkofmo + quarter, data = new_df3)
+fit2 <- lm(demean_mean~lag(newCases,2) + dayofwk + wkofmo + quarter, data = new_df3)
+fit3 <- lm(demean_mean~lag(newCases,3) + dayofwk + wkofmo + quarter, data = new_df3)
+fit4 <- lm(demean_mean~lag(newCases,4) + dayofwk + wkofmo + quarter, data = new_df3)
+fit5 <- lm(demean_mean~lag(newCases,5) + dayofwk + wkofmo + quarter, data = new_df3)
+fit6 <- lm(demean_mean~lag(newCases,6) + dayofwk + wkofmo + quarter, data = new_df3)
+fit7 <- lm(demean_mean~lag(newCases,7) + dayofwk + wkofmo + quarter, data = new_df3)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo + quarter
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table2-1-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 2-1-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1) + dayofwk + wkofmo + quarter, data = new_df3)
+fit2 <- lm(mean~lag(newDeaths,2) + dayofwk + wkofmo + quarter, data = new_df3)
+fit3 <- lm(mean~lag(newDeaths,3) + dayofwk + wkofmo + quarter, data = new_df3)
+fit4 <- lm(mean~lag(newDeaths,4) + dayofwk + wkofmo + quarter, data = new_df3)
+fit5 <- lm(mean~lag(newDeaths,5) + dayofwk + wkofmo + quarter, data = new_df3)
+fit6 <- lm(mean~lag(newDeaths,6) + dayofwk + wkofmo + quarter, data = new_df3)
+fit7 <- lm(mean~lag(newDeaths,7) + dayofwk + wkofmo + quarter, data = new_df3)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo + quarter
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table2-1-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 2-1-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1) + dayofwk + wkofmo + quarter, data = new_df3)
+fit2 <- lm(demean_mean~lag(newDeaths,2) + dayofwk + wkofmo + quarter, data = new_df3)
+fit3 <- lm(demean_mean~lag(newDeaths,3) + dayofwk + wkofmo + quarter, data = new_df3)
+fit4 <- lm(demean_mean~lag(newDeaths,4) + dayofwk + wkofmo + quarter, data = new_df3)
+fit5 <- lm(demean_mean~lag(newDeaths,5) + dayofwk + wkofmo + quarter, data = new_df3)
+fit6 <- lm(demean_mean~lag(newDeaths,6) + dayofwk + wkofmo + quarter, data = new_df3)
+fit7 <- lm(demean_mean~lag(newDeaths,7) + dayofwk + wkofmo + quarter, data = new_df3)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo + quarter
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table2-1-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 2-1-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1) + dayofwk + wkofmo + quarter, data = new_df3)
+fit2 <- lm(mean~lag(case_fatality_rate,2) + dayofwk + wkofmo + quarter, data = new_df3)
+fit3 <- lm(mean~lag(case_fatality_rate,3) + dayofwk + wkofmo + quarter, data = new_df3)
+fit4 <- lm(mean~lag(case_fatality_rate,4) + dayofwk + wkofmo + quarter, data = new_df3)
+fit5 <- lm(mean~lag(case_fatality_rate,5) + dayofwk + wkofmo + quarter, data = new_df3)
+fit6 <- lm(mean~lag(case_fatality_rate,6) + dayofwk + wkofmo + quarter, data = new_df3)
+fit7 <- lm(mean~lag(case_fatality_rate,7) + dayofwk + wkofmo + quarter, data = new_df3)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo + quarter
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table2-1-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 2-1-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1) + dayofwk + wkofmo + quarter, data = new_df3)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2) + dayofwk + wkofmo + quarter, data = new_df3)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3) + dayofwk + wkofmo + quarter, data = new_df3)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4) + dayofwk + wkofmo + quarter, data = new_df3)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5) + dayofwk + wkofmo + quarter, data = new_df3)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6) + dayofwk + wkofmo + quarter, data = new_df3)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7) + dayofwk + wkofmo + quarter, data = new_df3)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo + quarter
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table2-1-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+## 2-2 three-day
+### 2-2-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1) + dayofwk + wkofmo + quarter, data = new_df4)
+fit2 <- lm(mean~lag(newCases,2) + dayofwk + wkofmo + quarter, data = new_df4)
+fit3 <- lm(mean~lag(newCases,3) + dayofwk + wkofmo + quarter, data = new_df4)
+fit4 <- lm(mean~lag(newCases,4) + dayofwk + wkofmo + quarter, data = new_df4)
+fit5 <- lm(mean~lag(newCases,5) + dayofwk + wkofmo + quarter, data = new_df4)
+fit6 <- lm(mean~lag(newCases,6) + dayofwk + wkofmo + quarter, data = new_df4)
+fit7 <- lm(mean~lag(newCases,7) + dayofwk + wkofmo + quarter, data = new_df4)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo + quarter
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table2-2-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 2-2-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1) + dayofwk + wkofmo + quarter, data = new_df4)
+fit2 <- lm(demean_mean~lag(newCases,2) + dayofwk + wkofmo + quarter, data = new_df4)
+fit3 <- lm(demean_mean~lag(newCases,3) + dayofwk + wkofmo + quarter, data = new_df4)
+fit4 <- lm(demean_mean~lag(newCases,4) + dayofwk + wkofmo + quarter, data = new_df4)
+fit5 <- lm(demean_mean~lag(newCases,5) + dayofwk + wkofmo + quarter, data = new_df4)
+fit6 <- lm(demean_mean~lag(newCases,6) + dayofwk + wkofmo + quarter, data = new_df4)
+fit7 <- lm(demean_mean~lag(newCases,7) + dayofwk + wkofmo + quarter, data = new_df4)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo + quarter
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table2-2-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 2-2-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1) + dayofwk + wkofmo + quarter, data = new_df4)
+fit2 <- lm(mean~lag(newDeaths,2) + dayofwk + wkofmo + quarter, data = new_df4)
+fit3 <- lm(mean~lag(newDeaths,3) + dayofwk + wkofmo + quarter, data = new_df4)
+fit4 <- lm(mean~lag(newDeaths,4) + dayofwk + wkofmo + quarter, data = new_df4)
+fit5 <- lm(mean~lag(newDeaths,5) + dayofwk + wkofmo + quarter, data = new_df4)
+fit6 <- lm(mean~lag(newDeaths,6) + dayofwk + wkofmo + quarter, data = new_df4)
+fit7 <- lm(mean~lag(newDeaths,7) + dayofwk + wkofmo + quarter, data = new_df4)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo + quarter
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table2-2-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 2-2-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1) + dayofwk + wkofmo + quarter, data = new_df4)
+fit2 <- lm(demean_mean~lag(newDeaths,2) + dayofwk + wkofmo + quarter, data = new_df4)
+fit3 <- lm(demean_mean~lag(newDeaths,3) + dayofwk + wkofmo + quarter, data = new_df4)
+fit4 <- lm(demean_mean~lag(newDeaths,4) + dayofwk + wkofmo + quarter, data = new_df4)
+fit5 <- lm(demean_mean~lag(newDeaths,5) + dayofwk + wkofmo + quarter, data = new_df4)
+fit6 <- lm(demean_mean~lag(newDeaths,6) + dayofwk + wkofmo + quarter, data = new_df4)
+fit7 <- lm(demean_mean~lag(newDeaths,7) + dayofwk + wkofmo + quarter, data = new_df4)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo + quarter
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table2-2-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 2-2-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1) + dayofwk + wkofmo + quarter, data = new_df4)
+fit2 <- lm(mean~lag(case_fatality_rate,2) + dayofwk + wkofmo + quarter, data = new_df4)
+fit3 <- lm(mean~lag(case_fatality_rate,3) + dayofwk + wkofmo + quarter, data = new_df4)
+fit4 <- lm(mean~lag(case_fatality_rate,4) + dayofwk + wkofmo + quarter, data = new_df4)
+fit5 <- lm(mean~lag(case_fatality_rate,5) + dayofwk + wkofmo + quarter, data = new_df4)
+fit6 <- lm(mean~lag(case_fatality_rate,6) + dayofwk + wkofmo + quarter, data = new_df4)
+fit7 <- lm(mean~lag(case_fatality_rate,7) + dayofwk + wkofmo + quarter, data = new_df4)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo + quarter
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table2-2-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 2-2-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1) + dayofwk + wkofmo + quarter, data = new_df4)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2) + dayofwk + wkofmo + quarter, data = new_df4)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3) + dayofwk + wkofmo + quarter, data = new_df4)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4) + dayofwk + wkofmo + quarter, data = new_df4)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5) + dayofwk + wkofmo + quarter, data = new_df4)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6) + dayofwk + wkofmo + quarter, data = new_df4)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7) + dayofwk + wkofmo + quarter, data = new_df4)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo + quarter
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table2-2-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+# *emergency decisions and policy response in 2020*
+3.13 Start of lockdown in Sao Paulo
+3.24 Decree of quarantine and social distancing guidelines [socialdis = 1]
+4.20 MOH started to ease social isolation guidelines (lockdown between 3.13 and 4.20) [lockdown = 1]
+6.20 Trial of Oxford COVID-19 vaccine and Sinovac vaccine started [vactrial = 1]
+12.12 Brazilian government unveiled its national vaccination plan against Covid-19 [vacplan = 1]
+
+**Reference: **
+https://noticias.uol.com.br/saude/ultimas-noticias/redacao/2020/04/07/sp-tera-hospital-de-campanha-contra-covid-19-no-complexo-do-ibirapuera.htm  
+https://www.nytimes.com/article/brazil-coronavirus-cases.html  
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7214305/  
+https://clinicaltrials.gov/ct2/show/NCT04456595  
+https://covid19vaccinetrial.co.uk/brazil-trial-launch  
+https://www.straitstimes.com/world/brazil-to-roll-out-covid-19-vaccination-in-first-half-of-2021  
+https://en.wikipedia.org/wiki/COVID-19_pandemic_in_Brazil#cite_note-40  
+https://www.scielo.br/j/eins/a/VFchpPrYBTJBmDgrbPpFFtk/?lang=en#  
+
+
+
+
+# regression 3 (d&w+quarter+lockdown)
+## 3-1 daily
+### 3-1-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit2 <- lm(mean~lag(newCases,2) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit3 <- lm(mean~lag(newCases,3) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit4 <- lm(mean~lag(newCases,4) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit5 <- lm(mean~lag(newCases,5) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit6 <- lm(mean~lag(newCases,6) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit7 <- lm(mean~lag(newCases,7) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo + quarter + lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table3-1-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 3-1-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit2 <- lm(demean_mean~lag(newCases,2) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit3 <- lm(demean_mean~lag(newCases,3) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit4 <- lm(demean_mean~lag(newCases,4) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit5 <- lm(demean_mean~lag(newCases,5) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit6 <- lm(demean_mean~lag(newCases,6) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit7 <- lm(demean_mean~lag(newCases,7) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo + quarter + lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table3-1-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 3-1-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit2 <- lm(mean~lag(newDeaths,2) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit3 <- lm(mean~lag(newDeaths,3) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit4 <- lm(mean~lag(newDeaths,4) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit5 <- lm(mean~lag(newDeaths,5) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit6 <- lm(mean~lag(newDeaths,6) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit7 <- lm(mean~lag(newDeaths,7) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo + quarter + lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table3-1-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 3-1-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit2 <- lm(demean_mean~lag(newDeaths,2) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit3 <- lm(demean_mean~lag(newDeaths,3) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit4 <- lm(demean_mean~lag(newDeaths,4) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit5 <- lm(demean_mean~lag(newDeaths,5) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit6 <- lm(demean_mean~lag(newDeaths,6) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit7 <- lm(demean_mean~lag(newDeaths,7) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo + quarter + lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table3-1-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 3-1-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit2 <- lm(mean~lag(case_fatality_rate,2) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit3 <- lm(mean~lag(case_fatality_rate,3) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit4 <- lm(mean~lag(case_fatality_rate,4) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit5 <- lm(mean~lag(case_fatality_rate,5) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit6 <- lm(mean~lag(case_fatality_rate,6) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit7 <- lm(mean~lag(case_fatality_rate,7) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo + quarter + lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table3-1-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 3-1-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7) + dayofwk + wkofmo + quarter + lockdown, data = new_df3)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo + quarter + lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table3-1-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+## 3-2 three-day
+### 3-2-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit2 <- lm(mean~lag(newCases,2) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit3 <- lm(mean~lag(newCases,3) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit4 <- lm(mean~lag(newCases,4) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit5 <- lm(mean~lag(newCases,5) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit6 <- lm(mean~lag(newCases,6) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit7 <- lm(mean~lag(newCases,7) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo + quarter + lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table3-2-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 3-2-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit2 <- lm(demean_mean~lag(newCases,2) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit3 <- lm(demean_mean~lag(newCases,3) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit4 <- lm(demean_mean~lag(newCases,4) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit5 <- lm(demean_mean~lag(newCases,5) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit6 <- lm(demean_mean~lag(newCases,6) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit7 <- lm(demean_mean~lag(newCases,7) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo + quarter + lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table3-2-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 3-2-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit2 <- lm(mean~lag(newDeaths,2) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit3 <- lm(mean~lag(newDeaths,3) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit4 <- lm(mean~lag(newDeaths,4) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit5 <- lm(mean~lag(newDeaths,5) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit6 <- lm(mean~lag(newDeaths,6) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit7 <- lm(mean~lag(newDeaths,7) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo + quarter + lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table3-2-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 3-2-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit2 <- lm(demean_mean~lag(newDeaths,2) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit3 <- lm(demean_mean~lag(newDeaths,3) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit4 <- lm(demean_mean~lag(newDeaths,4) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit5 <- lm(demean_mean~lag(newDeaths,5) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit6 <- lm(demean_mean~lag(newDeaths,6) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit7 <- lm(demean_mean~lag(newDeaths,7) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo + quarter + lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table3-2-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 3-2-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit2 <- lm(mean~lag(case_fatality_rate,2) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit3 <- lm(mean~lag(case_fatality_rate,3) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit4 <- lm(mean~lag(case_fatality_rate,4) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit5 <- lm(mean~lag(case_fatality_rate,5) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit6 <- lm(mean~lag(case_fatality_rate,6) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit7 <- lm(mean~lag(case_fatality_rate,7) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo + quarter + lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table3-2-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 3-2-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7) + dayofwk + wkofmo + quarter + lockdown, data = new_df4)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo + quarter + lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "quarter", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table3-2-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+# regression 4 (lockdown)
+## 4-1 daily
+### 4-1-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1) +lockdown, data = new_df3)
+fit2 <- lm(mean~lag(newCases,2) +lockdown, data = new_df3)
+fit3 <- lm(mean~lag(newCases,3) +lockdown, data = new_df3)
+fit4 <- lm(mean~lag(newCases,4) +lockdown, data = new_df3)
+fit5 <- lm(mean~lag(newCases,5) +lockdown, data = new_df3)
+fit6 <- lm(mean~lag(newCases,6) +lockdown, data = new_df3)
+fit7 <- lm(mean~lag(newCases,7) +lockdown, data = new_df3)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          +lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table4-1-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 4-1-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1) +lockdown, data = new_df3)
+fit2 <- lm(demean_mean~lag(newCases,2) +lockdown, data = new_df3)
+fit3 <- lm(demean_mean~lag(newCases,3) +lockdown, data = new_df3)
+fit4 <- lm(demean_mean~lag(newCases,4) +lockdown, data = new_df3)
+fit5 <- lm(demean_mean~lag(newCases,5) +lockdown, data = new_df3)
+fit6 <- lm(demean_mean~lag(newCases,6) +lockdown, data = new_df3)
+fit7 <- lm(demean_mean~lag(newCases,7) +lockdown, data = new_df3)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          +lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table4-1-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 4-1-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1) +lockdown, data = new_df3)
+fit2 <- lm(mean~lag(newDeaths,2) +lockdown, data = new_df3)
+fit3 <- lm(mean~lag(newDeaths,3) +lockdown, data = new_df3)
+fit4 <- lm(mean~lag(newDeaths,4) +lockdown, data = new_df3)
+fit5 <- lm(mean~lag(newDeaths,5) +lockdown, data = new_df3)
+fit6 <- lm(mean~lag(newDeaths,6) +lockdown, data = new_df3)
+fit7 <- lm(mean~lag(newDeaths,7) +lockdown, data = new_df3)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          +lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table4-1-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 4-1-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1) +lockdown, data = new_df3)
+fit2 <- lm(demean_mean~lag(newDeaths,2) +lockdown, data = new_df3)
+fit3 <- lm(demean_mean~lag(newDeaths,3) +lockdown, data = new_df3)
+fit4 <- lm(demean_mean~lag(newDeaths,4) +lockdown, data = new_df3)
+fit5 <- lm(demean_mean~lag(newDeaths,5) +lockdown, data = new_df3)
+fit6 <- lm(demean_mean~lag(newDeaths,6) +lockdown, data = new_df3)
+fit7 <- lm(demean_mean~lag(newDeaths,7) +lockdown, data = new_df3)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          +lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table4-1-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 4-1-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1) +lockdown, data = new_df3)
+fit2 <- lm(mean~lag(case_fatality_rate,2) +lockdown, data = new_df3)
+fit3 <- lm(mean~lag(case_fatality_rate,3) +lockdown, data = new_df3)
+fit4 <- lm(mean~lag(case_fatality_rate,4) +lockdown, data = new_df3)
+fit5 <- lm(mean~lag(case_fatality_rate,5) +lockdown, data = new_df3)
+fit6 <- lm(mean~lag(case_fatality_rate,6) +lockdown, data = new_df3)
+fit7 <- lm(mean~lag(case_fatality_rate,7) +lockdown, data = new_df3)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          +lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table4-1-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 4-1-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1) +lockdown, data = new_df3)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2) +lockdown, data = new_df3)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3) +lockdown, data = new_df3)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4) +lockdown, data = new_df3)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5) +lockdown, data = new_df3)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6) +lockdown, data = new_df3)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7) +lockdown, data = new_df3)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          +lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table4-1-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+## 4-2 three-day
+### 4-2-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1) +lockdown, data = new_df4)
+fit2 <- lm(mean~lag(newCases,2) +lockdown, data = new_df4)
+fit3 <- lm(mean~lag(newCases,3) +lockdown, data = new_df4)
+fit4 <- lm(mean~lag(newCases,4) +lockdown, data = new_df4)
+fit5 <- lm(mean~lag(newCases,5) +lockdown, data = new_df4)
+fit6 <- lm(mean~lag(newCases,6) +lockdown, data = new_df4)
+fit7 <- lm(mean~lag(newCases,7) +lockdown, data = new_df4)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          +lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table4-2-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 4-2-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1) +lockdown, data = new_df4)
+fit2 <- lm(demean_mean~lag(newCases,2) +lockdown, data = new_df4)
+fit3 <- lm(demean_mean~lag(newCases,3) +lockdown, data = new_df4)
+fit4 <- lm(demean_mean~lag(newCases,4) +lockdown, data = new_df4)
+fit5 <- lm(demean_mean~lag(newCases,5) +lockdown, data = new_df4)
+fit6 <- lm(demean_mean~lag(newCases,6) +lockdown, data = new_df4)
+fit7 <- lm(demean_mean~lag(newCases,7) +lockdown, data = new_df4)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          +lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table4-2-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 4-2-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1) +lockdown, data = new_df4)
+fit2 <- lm(mean~lag(newDeaths,2) +lockdown, data = new_df4)
+fit3 <- lm(mean~lag(newDeaths,3) +lockdown, data = new_df4)
+fit4 <- lm(mean~lag(newDeaths,4) +lockdown, data = new_df4)
+fit5 <- lm(mean~lag(newDeaths,5) +lockdown, data = new_df4)
+fit6 <- lm(mean~lag(newDeaths,6) +lockdown, data = new_df4)
+fit7 <- lm(mean~lag(newDeaths,7) +lockdown, data = new_df4)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          +lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table4-2-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 4-2-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1) +lockdown, data = new_df4)
+fit2 <- lm(demean_mean~lag(newDeaths,2) +lockdown, data = new_df4)
+fit3 <- lm(demean_mean~lag(newDeaths,3) +lockdown, data = new_df4)
+fit4 <- lm(demean_mean~lag(newDeaths,4) +lockdown, data = new_df4)
+fit5 <- lm(demean_mean~lag(newDeaths,5) +lockdown, data = new_df4)
+fit6 <- lm(demean_mean~lag(newDeaths,6) +lockdown, data = new_df4)
+fit7 <- lm(demean_mean~lag(newDeaths,7) +lockdown, data = new_df4)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          +lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table4-2-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 4-2-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1) +lockdown, data = new_df4)
+fit2 <- lm(mean~lag(case_fatality_rate,2) +lockdown, data = new_df4)
+fit3 <- lm(mean~lag(case_fatality_rate,3) +lockdown, data = new_df4)
+fit4 <- lm(mean~lag(case_fatality_rate,4) +lockdown, data = new_df4)
+fit5 <- lm(mean~lag(case_fatality_rate,5) +lockdown, data = new_df4)
+fit6 <- lm(mean~lag(case_fatality_rate,6) +lockdown, data = new_df4)
+fit7 <- lm(mean~lag(case_fatality_rate,7) +lockdown, data = new_df4)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          +lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table4-2-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 4-2-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1) +lockdown, data = new_df4)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2) +lockdown, data = new_df4)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3) +lockdown, data = new_df4)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4) +lockdown, data = new_df4)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5) +lockdown, data = new_df4)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6) +lockdown, data = new_df4)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7) +lockdown, data = new_df4)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          +lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table4-2-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+# regression 5 (d&w + lockdown)
+## 5-1 daily
+### 5-1-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit2 <- lm(mean~lag(newCases,2) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit3 <- lm(mean~lag(newCases,3) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit4 <- lm(mean~lag(newCases,4) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit5 <- lm(mean~lag(newCases,5) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit6 <- lm(mean~lag(newCases,6) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit7 <- lm(mean~lag(newCases,7) + dayofwk + wkofmo + lockdown, data = new_df3)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo + lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table5-1-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 5-1-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit2 <- lm(demean_mean~lag(newCases,2) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit3 <- lm(demean_mean~lag(newCases,3) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit4 <- lm(demean_mean~lag(newCases,4) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit5 <- lm(demean_mean~lag(newCases,5) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit6 <- lm(demean_mean~lag(newCases,6) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit7 <- lm(demean_mean~lag(newCases,7) + dayofwk + wkofmo + lockdown, data = new_df3)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo + lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table5-1-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 5-1-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit2 <- lm(mean~lag(newDeaths,2) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit3 <- lm(mean~lag(newDeaths,3) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit4 <- lm(mean~lag(newDeaths,4) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit5 <- lm(mean~lag(newDeaths,5) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit6 <- lm(mean~lag(newDeaths,6) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit7 <- lm(mean~lag(newDeaths,7) + dayofwk + wkofmo + lockdown, data = new_df3)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo + lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table5-1-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 5-1-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit2 <- lm(demean_mean~lag(newDeaths,2) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit3 <- lm(demean_mean~lag(newDeaths,3) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit4 <- lm(demean_mean~lag(newDeaths,4) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit5 <- lm(demean_mean~lag(newDeaths,5) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit6 <- lm(demean_mean~lag(newDeaths,6) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit7 <- lm(demean_mean~lag(newDeaths,7) + dayofwk + wkofmo + lockdown, data = new_df3)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo + lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table5-1-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 5-1-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit2 <- lm(mean~lag(case_fatality_rate,2) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit3 <- lm(mean~lag(case_fatality_rate,3) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit4 <- lm(mean~lag(case_fatality_rate,4) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit5 <- lm(mean~lag(case_fatality_rate,5) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit6 <- lm(mean~lag(case_fatality_rate,6) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit7 <- lm(mean~lag(case_fatality_rate,7) + dayofwk + wkofmo + lockdown, data = new_df3)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo + lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table5-1-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 5-1-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6) + dayofwk + wkofmo + lockdown, data = new_df3)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7) + dayofwk + wkofmo + lockdown, data = new_df3)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo + lockdown
+          ,
+          data = new_df3)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table5-1-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+## 5-2 three-day
+### 5-2-1 raw mean newCases
+```{r}
+fit1 <- lm(mean~lag(newCases,1) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit2 <- lm(mean~lag(newCases,2) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit3 <- lm(mean~lag(newCases,3) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit4 <- lm(mean~lag(newCases,4) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit5 <- lm(mean~lag(newCases,5) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit6 <- lm(mean~lag(newCases,6) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit7 <- lm(mean~lag(newCases,7) + dayofwk + wkofmo + lockdown, data = new_df4)
+
+fit <- lm(mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo + lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table5-2-1.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 5-2-2 demean mean newCases
+```{r}
+fit1 <- lm(demean_mean~lag(newCases,1) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit2 <- lm(demean_mean~lag(newCases,2) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit3 <- lm(demean_mean~lag(newCases,3) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit4 <- lm(demean_mean~lag(newCases,4) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit5 <- lm(demean_mean~lag(newCases,5) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit6 <- lm(demean_mean~lag(newCases,6) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit7 <- lm(demean_mean~lag(newCases,7) + dayofwk + wkofmo + lockdown, data = new_df4)
+
+fit <- lm(demean_mean~lag(newCases,1)
+          +lag(newCases,2)
+          +lag(newCases,3)
+          +lag(newCases,4)
+          +lag(newCases,5)
+          +lag(newCases,6)
+          +lag(newCases,7)
+          + dayofwk + wkofmo + lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newCases",
+          out = "table5-2-2.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 5-2-3 raw mean newDeaths
+```{r}
+fit1 <- lm(mean~lag(newDeaths,1) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit2 <- lm(mean~lag(newDeaths,2) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit3 <- lm(mean~lag(newDeaths,3) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit4 <- lm(mean~lag(newDeaths,4) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit5 <- lm(mean~lag(newDeaths,5) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit6 <- lm(mean~lag(newDeaths,6) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit7 <- lm(mean~lag(newDeaths,7) + dayofwk + wkofmo + lockdown, data = new_df4)
+
+fit <- lm(mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo + lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table5-2-3.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 5-2-4 demean mean newDeaths
+```{r}
+fit1 <- lm(demean_mean~lag(newDeaths,1) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit2 <- lm(demean_mean~lag(newDeaths,2) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit3 <- lm(demean_mean~lag(newDeaths,3) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit4 <- lm(demean_mean~lag(newDeaths,4) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit5 <- lm(demean_mean~lag(newDeaths,5) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit6 <- lm(demean_mean~lag(newDeaths,6) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit7 <- lm(demean_mean~lag(newDeaths,7) + dayofwk + wkofmo + lockdown, data = new_df4)
+
+fit <- lm(demean_mean~lag(newDeaths,1)
+          +lag(newDeaths,2)
+          +lag(newDeaths,3)
+          +lag(newDeaths,4)
+          +lag(newDeaths,5)
+          +lag(newDeaths,6)
+          +lag(newDeaths,7)
+          + dayofwk + wkofmo + lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "newDeaths",
+          out = "table5-2-4.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 5-2-5 raw mean CFR
+```{r}
+fit1 <- lm(mean~lag(case_fatality_rate,1) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit2 <- lm(mean~lag(case_fatality_rate,2) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit3 <- lm(mean~lag(case_fatality_rate,3) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit4 <- lm(mean~lag(case_fatality_rate,4) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit5 <- lm(mean~lag(case_fatality_rate,5) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit6 <- lm(mean~lag(case_fatality_rate,6) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit7 <- lm(mean~lag(case_fatality_rate,7) + dayofwk + wkofmo + lockdown, data = new_df4)
+
+fit <- lm(mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo + lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'mean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table5-2-5.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+### 5-2-6 demean mean CFR
+```{r}
+fit1 <- lm(demean_mean~lag(case_fatality_rate,1) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit2 <- lm(demean_mean~lag(case_fatality_rate,2) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit3 <- lm(demean_mean~lag(case_fatality_rate,3) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit4 <- lm(demean_mean~lag(case_fatality_rate,4) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit5 <- lm(demean_mean~lag(case_fatality_rate,5) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit6 <- lm(demean_mean~lag(case_fatality_rate,6) + dayofwk + wkofmo + lockdown, data = new_df4)
+fit7 <- lm(demean_mean~lag(case_fatality_rate,7) + dayofwk + wkofmo + lockdown, data = new_df4)
+
+fit <- lm(demean_mean~lag(case_fatality_rate,1)
+          +lag(case_fatality_rate,2)
+          +lag(case_fatality_rate,3)
+          +lag(case_fatality_rate,4)
+          +lag(case_fatality_rate,5)
+          +lag(case_fatality_rate,6)
+          +lag(case_fatality_rate,7)
+          + dayofwk + wkofmo + lockdown
+          ,
+          data = new_df4)
+```
+
+```{r}
+stargazer(fit1, fit2, fit3, fit4, fit5, fit6, fit7, fit,
+          type = 'text', title = 'meanDemean', single.row = F, 
+          column.sep.width = "-15pt",  align = TRUE, 
+          omit.stat = c("f", "ser"), 
+          omit = c("dayofwk", "wkofmo", "lockdown"),
+          dep.var.labels.include = F, 
+          dep.var.caption = "CFR",
+          out = "table5-2-6.txt",
+          covariate.labels = c("lag1", 'lag2', 'lag3', 'lag4', "lag5", 'lag6', 'lag7'))
+```
+
+
+
+
+
+
+
+
+
+
+
